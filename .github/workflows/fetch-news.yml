@@ -1,0 +1,31 @@
+name: 뉴스 자동 수집
+
+on:
+  schedule:
+    - cron: '0 0,6,12,18 * * *'   # 매일 0시 / 6시 / 12시 / 18시 (UTC)
+  workflow_dispatch:                 # 수동 실행 허용
+
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 패키지 설치
+        run: npm install
+
+      - name: 뉴스 수집 실행
+        run: node scripts/fetch-news.js
+        env:
+          GEMINI_API_KEY:           ${{ secrets.GEMINI_API_KEY }}
+          NEWSDATA_API_KEY:         ${{ secrets.NEWSDATA_API_KEY }}
+          UPSTASH_REDIS_REST_URL:   ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}

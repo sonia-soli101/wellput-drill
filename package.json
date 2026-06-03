@@ -1,0 +1,14 @@
+{
+  "name": "wellput-drill",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "fetch-news": "node scripts/fetch-news.js"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.34.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
