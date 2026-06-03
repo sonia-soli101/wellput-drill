@@ -243,13 +243,48 @@
     /* ── 주제 카드 ── */
     #topicCard { display: none; }
     #topicCard.show { display: block; }
-    #topicText {
+    #topicText { padding: 4px 0; }
+
+    .selected-art-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: var(--blue-light);
+      border-left: 3px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
+    .selected-art-tag {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      background: var(--blue);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 2px;
+    }
+    .selected-art-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1D4ED8;
+      line-height: 1.5;
+    }
+    .topic-q {
       font-size: 18px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.5;
+      margin-bottom: 8px;
       text-align: center;
-      padding: 8px 0;
+    }
+    .topic-bg {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 8px;
+      text-align: center;
     }
 
     /* ── 녹음 ── */
@@ -308,12 +343,33 @@
     #resultsSection { display: none; }
     #resultsSection.show { display: block; }
 
-    .scores-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
+    /* ── PREP 평가 결과 ── */
+    .total-score-box {
+      text-align: center;
+      padding: 20px 16px;
+      background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
+      border: 1px solid #C7D2FE;
+      border-radius: 12px;
       margin-bottom: 20px;
     }
+    .total-score-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+    .total-score-num { font-size: 56px; font-weight: 700; line-height: 1; }
+    .total-score-num.high { color: var(--green); }
+    .total-score-num.mid  { color: #D97706; }
+    .total-score-num.low  { color: var(--red); }
+    .total-denom { font-size: 20px; font-weight: 400; color: var(--muted); }
+
+    .prep-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .prep-item { background: var(--bg); border-radius: 10px; padding: 14px; }
+    .prep-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .prep-label { font-size: 13px; font-weight: 700; color: var(--text); border-left: 3px solid; padding-left: 8px; }
+    .prep-score { font-size: 22px; font-weight: 700; }
+    .prep-score.high { color: var(--green); }
+    .prep-score.mid  { color: #D97706; }
+    .prep-score.low  { color: var(--red); }
+    .prep-denom { font-size: 13px; font-weight: 400; color: var(--muted); }
+    .prep-good    { font-size: 13px; color: #166534; background: #F0FDF4; border-radius: 6px; padding: 6px 10px; margin-top: 4px; line-height: 1.5; }
+    .prep-improve { font-size: 13px; color: #92400E; background: #FFFBEB; border-radius: 6px; padding: 6px 10px; margin-top: 4px; line-height: 1.5; }
     /* ══ 모바일 (~ 767px) ══ */
     @media (max-width: 767px) {
       header { padding: 14px 16px; }
@@ -355,65 +411,65 @@
       #recordStatus { font-size: 12px; }
       #transcriptBox { font-size: 13px; min-height: 64px; }
 
-      /* 점수 카드 */
-      .scores-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .score-card { padding: 10px 6px; }
-      .score-value { font-size: 22px; }
-      .score-label { font-size: 10px; }
-
-      /* 레이더 차트 */
+      /* PREP 평가 결과 */
+      .total-score-num { font-size: 42px; }
+      .total-denom { font-size: 16px; }
+      .prep-label { font-size: 12px; }
+      .prep-score { font-size: 18px; }
+      .prep-good, .prep-improve { font-size: 12px; padding: 5px 8px; }
       .chart-wrap { max-width: 260px; }
-
-      /* 피드백 */
-      .feedback-item { padding: 10px 12px; }
-      .feedback-item h4 { font-size: 12px; }
-      .feedback-item p  { font-size: 12px; }
-      .overall-box { font-size: 13px; padding: 14px; }
+      .summary-box p, .next-goal-box p { font-size: 13px; }
     }
 
     /* ══ 태블릿 (768px ~ 1023px) ══ */
     @media (min-width: 768px) and (max-width: 1023px) {
       main { padding: 20px 20px 44px; }
       .card { padding: 20px; }
-      .scores-grid { grid-template-columns: repeat(5, 1fr); }
       .chart-wrap { max-width: 300px; }
     }
 
-    .score-card {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-    }
-    .score-label { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
-    .score-value { font-size: 26px; font-weight: 700; }
-    .score-value.high { color: var(--green); }
-    .score-value.mid  { color: #D97706; }
-    .score-value.low  { color: var(--red); }
-
     .chart-wrap { max-width: 340px; margin: 0 auto 20px; }
 
-    .feedback-list { display: flex; flex-direction: column; gap: 10px; }
-    .feedback-item {
-      padding: 12px 14px;
-      border-left: 3px solid var(--blue);
-      background: var(--bg);
-      border-radius: 0 8px 8px 0;
-    }
-    .feedback-item h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-    .feedback-item p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
-
-    .overall-box {
+    .summary-box {
       background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
       border: 1px solid #C7D2FE;
       border-radius: 8px;
       padding: 16px;
-      font-size: 14px;
-      line-height: 1.7;
-      color: #3730A3;
       margin-top: 16px;
     }
-    .overall-box strong { display: block; font-size: 12px; font-weight: 700; color: var(--purple); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .8px; }
+    .summary-box strong, .next-goal-box strong {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 6px;
+    }
+    .summary-box p { font-size: 14px; color: #3730A3; line-height: 1.7; margin: 0; }
+    .next-goal-box {
+      background: linear-gradient(135deg, #F0FDF4, #ECFDF5);
+      border: 1px solid #BBF7D0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 10px;
+    }
+    .next-goal-box p { font-size: 14px; color: #166534; line-height: 1.7; margin: 0; font-weight: 500; }
+
+    /* ── 주제 생성 버튼 (모드 하단) ── */
+    .topic-gen-wrap {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .topic-gen-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(124,58,237,.3);
+    }
 
     /* ── 로딩 ── */
     .spinner {
@@ -476,9 +532,6 @@
       <button class="btn btn-primary" id="loadNewsBtn" onclick="loadNews()">
         🔄 뉴스 불러오기
       </button>
-      <button class="btn btn-purple" id="newsTopicBtn" onclick="generateNewsTopic()" disabled>
-        ✨ 주제 생성
-      </button>
     </div>
     <p class="loading-text" id="newsLoading">뉴스를 가져오는 중...</p>
     <div class="error-box" id="newsError"></div>
@@ -488,6 +541,9 @@
     </div>
     <div class="news-list" id="domesticList"></div>
     <div class="news-list" id="internationalList" style="display:none"></div>
+    <div class="topic-gen-wrap" id="newsTopicBtnWrap" style="display:none">
+      <button class="btn btn-purple topic-gen-btn" id="newsTopicBtn" onclick="generateNewsTopic()">✨ 오늘의 스피치 주제 생성</button>
+    </div>
   </div>
 
   <!-- ════════════ AI 용어 모드 ════════════ -->
@@ -495,10 +551,12 @@
     <div class="card-title">🔑 AI 핵심 용어</div>
     <div class="flex gap-8">
       <button class="btn btn-primary" onclick="selectRandomTerm()">🎲 랜덤 선택</button>
-      <button class="btn btn-purple" id="termTopicBtn" onclick="generateTermTopic()" disabled>✨ 주제 생성</button>
     </div>
     <div class="term-grid" id="termGrid"></div>
     <div class="error-box" id="termError"></div>
+    <div class="topic-gen-wrap" id="termTopicBtnWrap" style="display:none">
+      <button class="btn btn-purple topic-gen-btn" id="termTopicBtn" onclick="generateTermTopic()">✨ 오늘의 스피치 주제 생성</button>
+    </div>
   </div>
 
   <!-- ════════════ 내 자료 모드 ════════════ -->
@@ -532,18 +590,24 @@
       <button class="btn btn-teal" id="summarizeBtn" onclick="summarizeContent()">
         🔍 요약 & 분석
       </button>
-      <button class="btn btn-purple" id="customTopicBtn" onclick="generateCustomTopic()" disabled>
-        ✨ 주제 생성
-      </button>
     </div>
     <p class="loading-text" id="customLoading">분석 중...</p>
     <div class="error-box" id="customError"></div>
     <div class="summary-box" id="summaryBox"></div>
+    <div class="topic-gen-wrap" id="customTopicBtnWrap" style="display:none">
+      <button class="btn btn-purple topic-gen-btn" id="customTopicBtn" onclick="generateCustomTopic()">✨ 오늘의 스피치 주제 생성</button>
+    </div>
   </div>
 
   <!-- ════════════ 오늘의 주제 ════════════ -->
   <div class="card" id="topicCard">
     <div class="card-title">💬 오늘의 스피치 주제</div>
+    <div id="selectedArticleBox" style="display:none">
+      <div class="selected-art-row">
+        <span class="selected-art-tag">📰 선정 기사</span>
+        <span class="selected-art-name" id="selectedArticleTitle"></span>
+      </div>
+    </div>
     <div id="topicText"></div>
     <div class="divider"></div>
     <p style="font-size:13px;color:var(--muted);text-align:center">아래에서 음성을 녹음하고 스피치를 평가받아보세요</p>
@@ -580,22 +644,38 @@
 
   <!-- ════════════ 평가 결과 ════════════ -->
   <div class="card" id="resultsSection">
-    <div class="card-title">📊 평가 결과</div>
+    <div class="card-title">📊 PREP 평가 결과</div>
 
-    <div class="scores-grid" id="scoresGrid"></div>
+    <!-- 종합 점수 -->
+    <div class="total-score-box">
+      <div class="total-score-label">종합 점수</div>
+      <div>
+        <span class="total-score-num" id="totalScoreNum">—</span>
+        <span class="total-denom">/100</span>
+      </div>
+    </div>
 
+    <!-- PREP 항목별 평가 -->
+    <div class="card-title">📋 PREP 항목별 평가</div>
+    <div class="prep-list" id="prepList"></div>
+
+    <!-- 레이더 차트 -->
     <div class="chart-wrap">
       <canvas id="radarChart"></canvas>
     </div>
 
     <div class="divider"></div>
 
-    <div class="card-title">🔍 항목별 피드백</div>
-    <div class="feedback-list" id="feedbackList"></div>
+    <!-- 총평 -->
+    <div class="summary-box">
+      <strong>💬 종합 총평</strong>
+      <p id="summaryText"></p>
+    </div>
 
-    <div class="overall-box" id="overallBox">
-      <strong>종합 평가</strong>
-      <span id="overallText"></span>
+    <!-- 다음 목표 -->
+    <div class="next-goal-box">
+      <strong>🎯 다음 스피치 목표</strong>
+      <p id="nextGoalText"></p>
     </div>
 
     <div class="mt-12" style="text-align:center">
@@ -695,7 +775,7 @@
 
       document.getElementById('newsTypeTabs').style.display = '';
       setNewsTab('domestic');
-      document.getElementById('newsTopicBtn').disabled = false;
+      document.getElementById('newsTopicBtnWrap').style.display = '';
     } catch (e) {
       errorEl.textContent = '❌ ' + e.message;
       errorEl.classList.add('show');
@@ -788,7 +868,7 @@
     const chipId = `chip-${term.replace(/\s+/g, '_')}`;
     document.getElementById(chipId)?.classList.add('selected');
     selectedTerm = term;
-    document.getElementById('termTopicBtn').disabled = false;
+    document.getElementById('termTopicBtnWrap').style.display = '';
     document.getElementById('termError').classList.remove('show');
   }
 
@@ -857,7 +937,7 @@
       customSummary = data.summary;
       summaryBox.textContent = data.summary;
       summaryBox.classList.add('show');
-      document.getElementById('customTopicBtn').disabled = false;
+      document.getElementById('customTopicBtnWrap').style.display = '';
     } catch (e) {
       showError('customError', e.message);
     } finally {
@@ -875,8 +955,8 @@
   // ─────────────── 주제 생성 (공통) ───────────────
   async function callTopicAPI(body) {
     const topicCard = document.getElementById('topicCard');
-    const topicText = document.getElementById('topicText');
-    topicText.textContent = '주제를 생성하는 중...';
+    const topicTextEl = document.getElementById('topicText');
+    topicTextEl.innerHTML = '<div class="topic-bg">주제를 생성하는 중...</div>';
     topicCard.classList.add('show');
 
     try {
@@ -889,10 +969,30 @@
       if (!res.ok || data.error) throw new Error(data.error);
 
       currentTopic = data.topic;
-      topicText.textContent = data.topic;
+
+      // 선정 기사 표시 (뉴스 모드)
+      const selectedBox = document.getElementById('selectedArticleBox');
+      if (data.selectedArticle) {
+        document.getElementById('selectedArticleTitle').textContent = data.selectedArticle;
+        selectedBox.style.display = '';
+      } else {
+        selectedBox.style.display = 'none';
+      }
+
+      // 3문장 구조 렌더링 (첫/마지막 줄 = 질문, 가운데 = 배경)
+      const lines = (data.topic || '').split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length >= 2) {
+        topicTextEl.innerHTML = lines.map((line, i) => {
+          const isQ = i === 0 || i === lines.length - 1;
+          return `<div class="${isQ ? 'topic-q' : 'topic-bg'}">${escHtml(line)}</div>`;
+        }).join('');
+      } else {
+        topicTextEl.innerHTML = `<div class="topic-q">${escHtml(data.topic || '')}</div>`;
+      }
+
       document.getElementById('recordCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {
-      topicText.textContent = '❌ 주제 생성에 실패했습니다: ' + e.message;
+      topicTextEl.innerHTML = `<div style="color:var(--red)">❌ 주제 생성에 실패했습니다: ${escHtml(e.message)}</div>`;
     }
   }
 
@@ -1053,9 +1153,14 @@
     }
   }
 
-  // ─────────────── 결과 표시 ───────────────
-  const CRITERIA = ['두괄식', '근거', '예시', '결론', '전달력'];
-  const BORDER_COLORS = ['#2563EB', '#7C3AED', '#0891B2', '#059669', '#D97706'];
+  // ─────────────── 결과 표시 (PREP) ───────────────
+  const PREP_CRITERIA = [
+    { key: 'point_intro',      label: 'P. 핵심 먼저',  color: '#2563EB' },
+    { key: 'reason',           label: 'R. 논리 근거',  color: '#7C3AED' },
+    { key: 'example',          label: 'E. 구체 예시',  color: '#0891B2' },
+    { key: 'point_conclusion', label: 'P. 명확 결론',  color: '#059669' },
+    { key: 'clarity',          label: '전달 명확성',   color: '#D97706' }
+  ];
 
   function displayResults(result) {
     const section = document.getElementById('resultsSection');
@@ -1063,34 +1168,37 @@
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     const scores = result.scores || {};
-    const feedback = result.feedback || {};
+    const total  = result.total ?? 0;
 
-    // 점수 카드
-    const grid = document.getElementById('scoresGrid');
-    grid.innerHTML = CRITERIA.map(c => {
-      const v = scores[c] ?? 0;
-      const cls = v >= 75 ? 'high' : v >= 50 ? 'mid' : 'low';
-      return `<div class="score-card">
-        <div class="score-label">${c}</div>
-        <div class="score-value ${cls}">${v}</div>
+    // 종합 점수
+    const totalEl  = document.getElementById('totalScoreNum');
+    const totalCls = total >= 75 ? 'high' : total >= 50 ? 'mid' : 'low';
+    totalEl.textContent = total;
+    totalEl.className   = `total-score-num ${totalCls}`;
+
+    // PREP 항목별 평가
+    const prepList = document.getElementById('prepList');
+    prepList.innerHTML = PREP_CRITERIA.map(c => {
+      const item     = scores[c.key] || {};
+      const score    = item.score ?? 0;
+      const scoreCls = score >= 8 ? 'high' : score >= 5 ? 'mid' : 'low';
+      return `
+      <div class="prep-item">
+        <div class="prep-header">
+          <span class="prep-label" style="border-color:${c.color}">${c.label}</span>
+          <span class="prep-score ${scoreCls}">${score}<span class="prep-denom">/10</span></span>
+        </div>
+        ${item.good    ? `<div class="prep-good">✅ ${escHtml(item.good)}</div>`       : ''}
+        ${item.improve ? `<div class="prep-improve">💡 ${escHtml(item.improve)}</div>` : ''}
       </div>`;
     }).join('');
 
     // 레이더 차트
-    const vals = CRITERIA.map(c => scores[c] ?? 0);
-    updateRadarChart(vals);
+    updateRadarChart(PREP_CRITERIA.map(c => scores[c.key]?.score ?? 0));
 
-    // 항목별 피드백
-    const feedbackList = document.getElementById('feedbackList');
-    feedbackList.innerHTML = CRITERIA.map((c, i) => `
-      <div class="feedback-item" style="border-left-color:${BORDER_COLORS[i]}">
-        <h4>${c} — ${scores[c] ?? 0}점</h4>
-        <p>${escHtml(feedback[c] || '피드백 없음')}</p>
-      </div>
-    `).join('');
-
-    // 종합 평가
-    document.getElementById('overallText').textContent = result.overall || '';
+    // 총평 & 다음 목표
+    document.getElementById('summaryText').textContent  = result.summary   || '';
+    document.getElementById('nextGoalText').textContent = result.next_goal || '';
   }
 
   function updateRadarChart(values) {
@@ -1100,9 +1208,9 @@
     radarChart = new Chart(ctx, {
       type: 'radar',
       data: {
-        labels: CRITERIA,
+        labels: PREP_CRITERIA.map(c => c.label),
         datasets: [{
-          label: '스피치 점수',
+          label: 'PREP 점수',
           data: values,
           backgroundColor: 'rgba(37, 99, 235, 0.15)',
           borderColor: '#2563EB',
@@ -1116,9 +1224,9 @@
         scales: {
           r: {
             min: 0,
-            max: 100,
-            ticks: { stepSize: 20, font: { size: 10 } },
-            pointLabels: { font: { size: 13, weight: '700' }, color: '#1E293B' }
+            max: 10,
+            ticks: { stepSize: 2, font: { size: 10 } },
+            pointLabels: { font: { size: 12, weight: '700' }, color: '#1E293B' }
           }
         },
         plugins: { legend: { display: false } }

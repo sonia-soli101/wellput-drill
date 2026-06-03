@@ -12,47 +12,46 @@ module.exports = async function handler(req, res) {
   }
 
   const { audioBase64, audioMimeType, topic, transcript } = req.body;
-
   if (!audioBase64 && !transcript) {
     return res.status(400).json({ error: '오디오 또는 텍스트가 필요합니다.' });
   }
 
-  try {
-    let parts = [];
-    const evalInstruction = `주제: ${topic || '자유 주제'}
+  const evalInstruction = `주제: ${topic || '자유 주제'}
 
-다음 스피치를 아래 5가지 기준으로 각각 0~100점 평가하고, 한국어 피드백을 제공해주세요.
+다음 스피치를 PREP 프레임워크 기반으로 한국어로 평가해주세요.
 
-평가 기준:
-1. 두괄식: 핵심 내용을 먼저 제시했는가?
-2. 근거: 주장을 뒷받침하는 논리적 근거가 있는가?
-3. 예시: 구체적인 예시를 들었는가?
-4. 결론: 명확한 결론으로 마무리했는가?
-5. 전달력: 표현이 명확하고 이해하기 쉬운가?
+PREP 평가 기준 (각 항목 0~10점):
+- point_intro   (P - 핵심 먼저):   처음에 핵심 주장/결론을 명확히 제시했는가?
+- reason        (R - 논리적 근거): 주장을 뒷받침하는 논리적 이유를 제시했는가?
+- example       (E - 구체적 예시): 근거를 뒷받침하는 사례·데이터·경험을 들었는가?
+- point_conclusion (P - 명확한 결론): 핵심 주장을 다시 강조하며 마무리했는가?
+- clarity       (전달 명확성):     전체적으로 표현이 명확하고 논리 흐름이 있는가?
+
+total = 5개 점수 합산 × 2 (0~100점 환산)
 
 반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
 {
-  "transcript": "전사 또는 입력된 스피치 텍스트",
-  "scores": { "두괄식": 75, "근거": 80, "예시": 60, "결론": 85, "전달력": 70 },
-  "feedback": {
-    "두괄식": "구체적인 피드백",
-    "근거": "구체적인 피드백",
-    "예시": "구체적인 피드백",
-    "결론": "구체적인 피드백",
-    "전달력": "구체적인 피드백"
+  "scores": {
+    "point_intro":      { "score": 7, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
+    "reason":           { "score": 6, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
+    "example":          { "score": 5, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
+    "point_conclusion": { "score": 8, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
+    "clarity":          { "score": 7, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" }
   },
-  "overall": "종합 피드백 2~3문장"
+  "total": 66,
+  "summary": "전체 총평 2~3문장",
+  "next_goal": "다음 스피치를 위한 구체적 목표 1문장"
 }`;
 
+  try {
+    let parts = [];
     if (audioBase64) {
       parts = [
-        { text: `위 지시에 따라 다음 오디오 스피치를 먼저 한국어로 전사한 뒤 평가해주세요.\n\n${evalInstruction}` },
+        { text: `아래 지시에 따라 오디오 스피치를 먼저 한국어로 전사한 뒤 평가해주세요.\n\n${evalInstruction}` },
         { inline_data: { mime_type: audioMimeType || 'audio/webm', data: audioBase64 } }
       ];
     } else {
-      parts = [
-        { text: `${evalInstruction}\n\n스피치 텍스트:\n${transcript}` }
-      ];
+      parts = [{ text: `${evalInstruction}\n\n스피치 텍스트:\n${transcript}` }];
     }
 
     const response = await fetch(
@@ -84,7 +83,14 @@ module.exports = async function handler(req, res) {
       result = JSON.parse(rawText);
     } catch {
       const match = rawText.match(/\{[\s\S]*\}/);
-      result = match ? JSON.parse(match[0]) : { error: 'JSON 파싱 실패', raw: rawText };
+      result = match ? JSON.parse(match[0]) : { error: 'JSON 파싱 실패' };
+    }
+
+    // total 검증 및 재계산
+    if (result.scores) {
+      const keys = ['point_intro', 'reason', 'example', 'point_conclusion', 'clarity'];
+      const sum = keys.reduce((acc, k) => acc + (result.scores[k]?.score || 0), 0);
+      result.total = Math.round(sum * 2);
     }
 
     res.status(200).json(result);

@@ -105,11 +105,12 @@ module.exports = async function handler(req, res) {
       .map((a, i) => `기사 ${i + 1}:\n제목: ${a.title}\n내용: ${a.description || '(내용 없음)'}`)
       .join('\n\n');
 
-    const geminiPrompt = `다음 AI 관련 뉴스 기사들을 각각 한국어로 분석해주세요.
+    const geminiPrompt = `다음 AI 관련 뉴스 기사들(국내 한국어 + 국외 영어 혼합)을 각각 한국어로 분석해주세요.
+한국어 기사도 영어 기사도 모두 반드시 한국어로 요약하세요. 내용이 없으면 제목을 기반으로 추론해서 작성하세요.
 
 ${articleTexts}
 
-각 기사에 대해 아래 JSON 배열 형식으로만 응답하세요 (기사 순서 유지, 다른 텍스트 없이):
+반드시 아래 JSON 배열 형식으로만 응답하세요 (기사 순서 유지, 총 ${allRaw.length}개 항목, 다른 텍스트 없이):
 [
   {
     "summary": "핵심 내용 2~3문장 한국어 요약",
