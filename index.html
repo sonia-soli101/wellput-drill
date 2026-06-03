@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wellput Drill — AI 스피치 트레이너</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2563EB;
+      --blue-light: #EFF6FF;
+      --purple: #7C3AED;
+      --teal: #0891B2;
+      --green: #059669;
+      --red: #DC2626;
+      --bg: #F1F5F9;
+      --card: #FFFFFF;
+      --text: #1E293B;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── 헤더 ── */
+    header {
+      background: linear-gradient(135deg, #1E3A8A 0%, #4C1D95 100%);
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+    header .logo { font-size: 28px; }
+    header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    header p  { font-size: 12px; opacity: .75; margin-top: 2px; }
+
+    /* ── 레이아웃 ── */
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── 모드 탭 ── */
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--card);
+      padding: 6px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      box-shadow: 0 2px 8px rgba(37,99,235,.35);
+    }
+    .tab-btn:hover:not(.active) { background: var(--bg); color: var(--text); }
+
+    /* ── 모드 콘텐츠 ── */
+    .mode-content { display: none; }
+    .mode-content.active { display: block; }
+
+    /* ── 버튼 ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--blue); color: white; }
+    .btn-primary:hover { background: #1D4ED8; }
+    .btn-purple { background: var(--purple); color: white; }
+    .btn-purple:hover { background: #6D28D9; }
+    .btn-teal { background: var(--teal); color: white; }
+    .btn-teal:hover { background: #0E7490; }
+    .btn-outline {
+      background: transparent;
+      color: var(--blue);
+      border: 1.5px solid var(--blue);
+    }
+    .btn-outline:hover { background: var(--blue-light); }
+    .btn-danger { background: var(--red); color: white; }
+    .btn-danger:hover { background: #B91C1C; }
+    .btn-success { background: var(--green); color: white; }
+    .btn-success:hover { background: #047857; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── 뉴스 카드 ── */
+    .news-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .news-item {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .news-item:hover { border-color: var(--blue); background: var(--blue-light); }
+    .news-item.selected { border-color: var(--blue); background: var(--blue-light); }
+    .news-item h4 { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .news-item p  { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .news-source { font-size: 11px; color: var(--teal); margin-top: 4px; font-weight: 500; }
+
+    /* ── AI 용어 칩 ── */
+    .term-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .term-chip {
+      padding: 6px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      background: white;
+      color: var(--text);
+    }
+    .term-chip:hover { border-color: var(--purple); color: var(--purple); }
+    .term-chip.selected { background: var(--purple); color: white; border-color: var(--purple); }
+
+    /* ── 내 자료 ── */
+    .input-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+    .input-tab {
+      padding: 6px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      background: white;
+      color: var(--muted);
+      transition: all .2s;
+    }
+    .input-tab.active { background: var(--teal); color: white; border-color: var(--teal); }
+
+    .input-panel { display: none; }
+    .input-panel.active { display: block; }
+
+    input[type="url"], textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+      resize: vertical;
+    }
+    input[type="url"]:focus, textarea:focus { border-color: var(--teal); }
+
+    .file-drop {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .file-drop:hover { border-color: var(--teal); color: var(--teal); }
+    .file-drop.has-file { border-color: var(--green); color: var(--green); }
+    #pdfInput { display: none; }
+
+    /* ── 요약 결과 ── */
+    .summary-box {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #166534;
+      margin-top: 12px;
+      display: none;
+    }
+    .summary-box.show { display: block; }
+
+    /* ── 주제 카드 ── */
+    #topicCard { display: none; }
+    #topicCard.show { display: block; }
+    #topicText {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.5;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* ── 녹음 ── */
+    .record-area { text-align: center; }
+    .record-btn-wrap { position: relative; display: inline-block; }
+    #recordBtn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(37,99,235,.4);
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    #recordBtn:hover { transform: scale(1.05); }
+    #recordBtn.recording {
+      background: linear-gradient(135deg, var(--red), #EF4444);
+      box-shadow: 0 4px 16px rgba(220,38,38,.4);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    #timer {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 12px 0 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    #recordStatus { font-size: 13px; color: var(--muted); }
+
+    /* ── 전사 ── */
+    #transcriptBox {
+      min-height: 80px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      background: #FAFAFA;
+      white-space: pre-wrap;
+    }
+    #interimSpan { color: var(--muted); font-style: italic; }
+
+    /* ── 평가 결과 ── */
+    #resultsSection { display: none; }
+    #resultsSection.show { display: block; }
+
+    .scores-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 600px) { .scores-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .score-card {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .score-label { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .score-value { font-size: 26px; font-weight: 700; }
+    .score-value.high { color: var(--green); }
+    .score-value.mid  { color: #D97706; }
+    .score-value.low  { color: var(--red); }
+
+    .chart-wrap { max-width: 340px; margin: 0 auto 20px; }
+
+    .feedback-list { display: flex; flex-direction: column; gap: 10px; }
+    .feedback-item {
+      padding: 12px 14px;
+      border-left: 3px solid var(--blue);
+      background: var(--bg);
+      border-radius: 0 8px 8px 0;
+    }
+    .feedback-item h4 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .feedback-item p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    .overall-box {
+      background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
+      border: 1px solid #C7D2FE;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #3730A3;
+      margin-top: 16px;
+    }
+    .overall-box strong { display: block; font-size: 12px; font-weight: 700; color: var(--purple); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .8px; }
+
+    /* ── 로딩 ── */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text { color: var(--muted); font-size: 13px; display: none; margin-top: 8px; }
+    .loading-text.show { display: block; }
+
+    /* ── 에러 ── */
+    .error-box {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--red);
+      display: none;
+      margin-top: 10px;
+    }
+    .error-box.show { display: block; }
+
+    /* ── 유틸 ── */
+    .flex { display: flex; }
+    .gap-8 { gap: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo">🎤</span>
+  <div>
+    <h1>Wellput Drill</h1>
+    <p>AI 기반 스피치 논리 구조 트레이너</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── 모드 선택 ── -->
+  <div class="mode-tabs">
+    <button class="tab-btn active" onclick="setMode('news')">📰 AI 뉴스 모드</button>
+    <button class="tab-btn"        onclick="setMode('term')">🔑 AI 용어 모드</button>
+    <button class="tab-btn"        onclick="setMode('custom')">📄 내 자료 모드</button>
+  </div>
+
+  <!-- ════════════ AI 뉴스 모드 ════════════ -->
+  <div class="mode-content active card" id="mode-news">
+    <div class="card-title">📰 최신 AI 뉴스</div>
+    <div class="flex gap-8">
+      <button class="btn btn-primary" id="loadNewsBtn" onclick="loadNews()">
+        🔄 뉴스 불러오기
+      </button>
+      <button class="btn btn-purple" id="newsTopicBtn" onclick="generateNewsTopic()" disabled>
+        ✨ 주제 생성
+      </button>
+    </div>
+    <p class="loading-text" id="newsLoading">뉴스를 가져오는 중...</p>
+    <div class="error-box" id="newsError"></div>
+    <div class="news-list" id="newsList"></div>
+  </div>
+
+  <!-- ════════════ AI 용어 모드 ════════════ -->
+  <div class="mode-content card" id="mode-term">
+    <div class="card-title">🔑 AI 핵심 용어</div>
+    <div class="flex gap-8">
+      <button class="btn btn-primary" onclick="selectRandomTerm()">🎲 랜덤 선택</button>
+      <button class="btn btn-purple" id="termTopicBtn" onclick="generateTermTopic()" disabled>✨ 주제 생성</button>
+    </div>
+    <div class="term-grid" id="termGrid"></div>
+    <div class="error-box" id="termError"></div>
+  </div>
+
+  <!-- ════════════ 내 자료 모드 ════════════ -->
+  <div class="mode-content card" id="mode-custom">
+    <div class="card-title">📄 내 자료로 주제 만들기</div>
+
+    <div class="input-tabs">
+      <button class="input-tab active" onclick="setInputTab('url')">🔗 URL</button>
+      <button class="input-tab"        onclick="setInputTab('text')">✏️ 텍스트</button>
+      <button class="input-tab"        onclick="setInputTab('pdf')">📑 PDF</button>
+    </div>
+
+    <!-- URL -->
+    <div class="input-panel active" id="panel-url">
+      <input type="url" id="urlInput" placeholder="https://example.com/article" />
+    </div>
+    <!-- Text -->
+    <div class="input-panel" id="panel-text">
+      <textarea id="textInput" rows="5" placeholder="분석할 텍스트를 붙여넣으세요..."></textarea>
+    </div>
+    <!-- PDF -->
+    <div class="input-panel" id="panel-pdf">
+      <div class="file-drop" id="fileDrop" onclick="document.getElementById('pdfInput').click()">
+        <div style="font-size:32px;margin-bottom:8px">📑</div>
+        <div id="fileDropText">PDF 파일을 클릭하여 선택하세요</div>
+      </div>
+      <input type="file" id="pdfInput" accept=".pdf" onchange="handlePDF(this)" />
+    </div>
+
+    <div class="mt-12 flex gap-8">
+      <button class="btn btn-teal" id="summarizeBtn" onclick="summarizeContent()">
+        🔍 요약 & 분석
+      </button>
+      <button class="btn btn-purple" id="customTopicBtn" onclick="generateCustomTopic()" disabled>
+        ✨ 주제 생성
+      </button>
+    </div>
+    <p class="loading-text" id="customLoading">분석 중...</p>
+    <div class="error-box" id="customError"></div>
+    <div class="summary-box" id="summaryBox"></div>
+  </div>
+
+  <!-- ════════════ 오늘의 주제 ════════════ -->
+  <div class="card" id="topicCard">
+    <div class="card-title">💬 오늘의 스피치 주제</div>
+    <div id="topicText"></div>
+    <div class="divider"></div>
+    <p style="font-size:13px;color:var(--muted);text-align:center">아래에서 음성을 녹음하고 스피치를 평가받아보세요</p>
+  </div>
+
+  <!-- ════════════ 녹음 ════════════ -->
+  <div class="card" id="recordCard">
+    <div class="card-title">🎙️ 스피치 녹음</div>
+
+    <div class="record-area">
+      <button id="recordBtn" onclick="toggleRecording()">🎤</button>
+      <div id="timer">0:00</div>
+      <div id="recordStatus">버튼을 눌러 녹음을 시작하세요</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="card-title" style="margin:0">📝 인식된 텍스트</span>
+      <button class="btn btn-outline" style="font-size:12px;padding:6px 12px" onclick="clearTranscript()">지우기</button>
+    </div>
+    <div id="transcriptBox">
+      <span id="finalSpan"></span><span id="interimSpan"></span>
+    </div>
+
+    <div class="mt-12 flex gap-8" style="justify-content:center">
+      <button class="btn btn-success" id="evalBtn" onclick="evaluateSpeech()" disabled>
+        📊 논리 구조 평가
+      </button>
+    </div>
+    <p class="loading-text" id="evalLoading" style="text-align:center">Gemini가 스피치를 분석하는 중...</p>
+    <div class="error-box" id="evalError"></div>
+  </div>
+
+  <!-- ════════════ 평가 결과 ════════════ -->
+  <div class="card" id="resultsSection">
+    <div class="card-title">📊 평가 결과</div>
+
+    <div class="scores-grid" id="scoresGrid"></div>
+
+    <div class="chart-wrap">
+      <canvas id="radarChart"></canvas>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card-title">🔍 항목별 피드백</div>
+    <div class="feedback-list" id="feedbackList"></div>
+
+    <div class="overall-box" id="overallBox">
+      <strong>종합 평가</strong>
+      <span id="overallText"></span>
+    </div>
+
+    <div class="mt-12" style="text-align:center">
+      <button class="btn btn-primary" onclick="resetEval()">🔄 다시 연습하기</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ─────────────── 상태 ───────────────
+  let currentMode = 'news';
+  let currentTopic = '';
+  let newsArticles = [];
+  let selectedTerm = null;
+  let customSummary = '';
+  let customInputType = 'url';
+  let pdfBase64 = null;
+
+  let isRecording = false;
+  let recognition = null;
+  let finalTranscript = '';
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let audioBlob = null;
+  let timerInterval = null;
+  let recordingSeconds = 0;
+
+  let radarChart = null;
+
+  // ─────────────── AI 용어 목록 ───────────────
+  const AI_TERMS = [
+    { term: 'LLM', desc: 'Large Language Model' },
+    { term: 'RAG', desc: 'Retrieval-Augmented Generation' },
+    { term: 'Transformer', desc: '트랜스포머 아키텍처' },
+    { term: 'RLHF', desc: 'Reinforcement Learning from Human Feedback' },
+    { term: 'Fine-tuning', desc: '미세조정' },
+    { term: 'Embedding', desc: '임베딩 벡터' },
+    { term: 'Vector DB', desc: '벡터 데이터베이스' },
+    { term: 'Attention', desc: '어텐션 메커니즘' },
+    { term: 'Diffusion Model', desc: '확산 모델' },
+    { term: 'Prompt Engineering', desc: '프롬프트 엔지니어링' },
+    { term: 'Chain-of-Thought', desc: '사고의 연쇄' },
+    { term: 'Few-shot', desc: '소수샷 학습' },
+    { term: 'Zero-shot', desc: '제로샷 학습' },
+    { term: 'Hallucination', desc: '환각 현상' },
+    { term: 'Tokenization', desc: '토크나이제이션' },
+    { term: 'Multimodal AI', desc: '멀티모달 AI' },
+    { term: 'AI Agent', desc: 'AI 에이전트' },
+    { term: 'Quantization', desc: '모델 양자화' },
+    { term: 'Generative AI', desc: '생성형 AI' },
+    { term: 'MoE', desc: 'Mixture of Experts' },
+  ];
+
+  // ─────────────── 초기화 ───────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTermGrid();
+    setupSpeechRecognition();
+  });
+
+  // ─────────────── 모드 전환 ───────────────
+  function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(`mode-${mode}`).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // ─────────────── 뉴스 모드 ───────────────
+  async function loadNews() {
+    const btn = document.getElementById('loadNewsBtn');
+    const loadingEl = document.getElementById('newsLoading');
+    const errorEl = document.getElementById('newsError');
+    const listEl = document.getElementById('newsList');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 불러오는 중...';
+    loadingEl.classList.add('show');
+    errorEl.classList.remove('show');
+    listEl.innerHTML = '';
+
+    try {
+      const res = await fetch('/api/news');
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || '뉴스를 가져올 수 없습니다.');
+
+      newsArticles = data.articles;
+      renderNewsList(newsArticles);
+      document.getElementById('newsTopicBtn').disabled = false;
+    } catch (e) {
+      errorEl.textContent = '❌ ' + e.message;
+      errorEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '🔄 뉴스 불러오기';
+      loadingEl.classList.remove('show');
+    }
+  }
+
+  function renderNewsList(articles) {
+    const listEl = document.getElementById('newsList');
+    listEl.innerHTML = articles.map((a, i) => `
+      <div class="news-item" onclick="selectNews(${i})" id="news-${i}">
+        <h4>${escHtml(a.title)}</h4>
+        ${a.description ? `<p>${escHtml(a.description.slice(0, 120))}${a.description.length > 120 ? '...' : ''}</p>` : ''}
+        <div class="news-source">${escHtml(a.source)} · ${escHtml(a.pubDate?.slice(0, 10) || '')}</div>
+      </div>
+    `).join('');
+  }
+
+  let selectedNewsIdx = new Set();
+  function selectNews(idx) {
+    const el = document.getElementById(`news-${idx}`);
+    if (selectedNewsIdx.has(idx)) {
+      selectedNewsIdx.delete(idx);
+      el.classList.remove('selected');
+    } else {
+      selectedNewsIdx.add(idx);
+      el.classList.add('selected');
+    }
+  }
+
+  async function generateNewsTopic() {
+    const articles = selectedNewsIdx.size > 0
+      ? [...selectedNewsIdx].map(i => newsArticles[i])
+      : newsArticles;
+
+    await callTopicAPI({ mode: 'news', articles });
+  }
+
+  // ─────────────── 용어 모드 ───────────────
+  function renderTermGrid() {
+    const grid = document.getElementById('termGrid');
+    grid.innerHTML = AI_TERMS.map(t => `
+      <div class="term-chip" onclick="selectTerm('${escHtml(t.term)}')" id="chip-${t.term.replace(/\s+/g,'_')}">
+        <strong>${escHtml(t.term)}</strong><br/>
+        <span style="font-size:11px;opacity:.7">${escHtml(t.desc)}</span>
+      </div>
+    `).join('');
+  }
+
+  function selectRandomTerm() {
+    const t = AI_TERMS[Math.floor(Math.random() * AI_TERMS.length)];
+    selectTerm(t.term);
+    document.getElementById(`chip-${t.term.replace(/\s+/g,'_')}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function selectTerm(term) {
+    document.querySelectorAll('.term-chip').forEach(el => el.classList.remove('selected'));
+    const chipId = `chip-${term.replace(/\s+/g, '_')}`;
+    document.getElementById(chipId)?.classList.add('selected');
+    selectedTerm = term;
+    document.getElementById('termTopicBtn').disabled = false;
+    document.getElementById('termError').classList.remove('show');
+  }
+
+  async function generateTermTopic() {
+    if (!selectedTerm) return;
+    await callTopicAPI({ mode: 'term', term: selectedTerm });
+  }
+
+  // ─────────────── 내 자료 모드 ───────────────
+  function setInputTab(type) {
+    customInputType = type;
+    document.querySelectorAll('.input-tab').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.querySelectorAll('.input-panel').forEach(el => el.classList.remove('active'));
+    document.getElementById(`panel-${type}`).classList.add('active');
+  }
+
+  function handlePDF(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      pdfBase64 = e.target.result.split(',')[1];
+      document.getElementById('fileDropText').textContent = `✅ ${file.name}`;
+      document.getElementById('fileDrop').classList.add('has-file');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function summarizeContent() {
+    const btn = document.getElementById('summarizeBtn');
+    const loadingEl = document.getElementById('customLoading');
+    const errorEl = document.getElementById('customError');
+    const summaryBox = document.getElementById('summaryBox');
+
+    let body = { type: customInputType };
+
+    if (customInputType === 'url') {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) return showError('customError', 'URL을 입력해주세요.');
+      body.url = url;
+    } else if (customInputType === 'text') {
+      const text = document.getElementById('textInput').value.trim();
+      if (!text) return showError('customError', '텍스트를 입력해주세요.');
+      body.content = text;
+    } else if (customInputType === 'pdf') {
+      if (!pdfBase64) return showError('customError', 'PDF 파일을 먼저 선택해주세요.');
+      body.pdfBase64 = pdfBase64;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 분석 중...';
+    loadingEl.classList.add('show');
+    errorEl.classList.remove('show');
+    summaryBox.classList.remove('show');
+
+    try {
+      const res = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error);
+
+      customSummary = data.summary;
+      summaryBox.textContent = data.summary;
+      summaryBox.classList.add('show');
+      document.getElementById('customTopicBtn').disabled = false;
+    } catch (e) {
+      showError('customError', e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '🔍 요약 & 분석';
+      loadingEl.classList.remove('show');
+    }
+  }
+
+  async function generateCustomTopic() {
+    if (!customSummary) return;
+    await callTopicAPI({ mode: 'custom', summary: customSummary });
+  }
+
+  // ─────────────── 주제 생성 (공통) ───────────────
+  async function callTopicAPI(body) {
+    const topicCard = document.getElementById('topicCard');
+    const topicText = document.getElementById('topicText');
+    topicText.textContent = '주제를 생성하는 중...';
+    topicCard.classList.add('show');
+
+    try {
+      const res = await fetch('/api/topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error);
+
+      currentTopic = data.topic;
+      topicText.textContent = data.topic;
+      document.getElementById('recordCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+      topicText.textContent = '❌ 주제 생성에 실패했습니다: ' + e.message;
+    }
+  }
+
+  // ─────────────── Web Speech API ───────────────
+  function setupSpeechRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      document.getElementById('recordStatus').textContent = '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.';
+      return;
+    }
+    recognition = new SR();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          finalTranscript += e.results[i][0].transcript;
+        } else {
+          interim += e.results[i][0].transcript;
+        }
+      }
+      document.getElementById('finalSpan').textContent = finalTranscript;
+      document.getElementById('interimSpan').textContent = interim;
+      if (finalTranscript.trim()) {
+        document.getElementById('evalBtn').disabled = false;
+      }
+    };
+
+    recognition.onerror = (e) => {
+      console.error('STT 오류:', e.error);
+      if (e.error !== 'no-speech') {
+        document.getElementById('recordStatus').textContent = '음성 인식 오류: ' + e.error;
+      }
+    };
+
+    recognition.onend = () => {
+      if (isRecording) recognition.start(); // 자동 재시작 (continuous 보완)
+    };
+  }
+
+  // ─────────────── 녹음 토글 ───────────────
+  async function toggleRecording() {
+    if (!isRecording) {
+      await startRecording();
+    } else {
+      stopRecording();
+    }
+  }
+
+  async function startRecording() {
+    finalTranscript = '';
+    document.getElementById('finalSpan').textContent = '';
+    document.getElementById('interimSpan').textContent = '';
+    document.getElementById('evalBtn').disabled = true;
+    document.getElementById('resultsSection').classList.remove('show');
+
+    // MediaRecorder (음성 파일 저장용)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start(1000);
+    } catch (e) {
+      console.warn('MediaRecorder 실패 (STT 전용으로 계속):', e.message);
+    }
+
+    // 음성 인식 시작
+    if (recognition) recognition.start();
+
+    isRecording = true;
+    recordingSeconds = 0;
+    document.getElementById('recordBtn').classList.add('recording');
+    document.getElementById('recordBtn').innerHTML = '⏹';
+    document.getElementById('recordStatus').textContent = '녹음 중... (다시 누르면 중지)';
+
+    timerInterval = setInterval(() => {
+      recordingSeconds++;
+      const m = Math.floor(recordingSeconds / 60);
+      const s = String(recordingSeconds % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = `${m}:${s}`;
+    }, 1000);
+  }
+
+  function stopRecording() {
+    if (recognition) { try { recognition.stop(); } catch {} }
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    clearInterval(timerInterval);
+
+    isRecording = false;
+    document.getElementById('recordBtn').classList.remove('recording');
+    document.getElementById('recordBtn').innerHTML = '🎤';
+    document.getElementById('recordStatus').textContent = '녹음 완료. 아래에서 평가를 시작하세요.';
+
+    if (finalTranscript.trim()) {
+      document.getElementById('evalBtn').disabled = false;
+    }
+  }
+
+  function clearTranscript() {
+    finalTranscript = '';
+    document.getElementById('finalSpan').textContent = '';
+    document.getElementById('interimSpan').textContent = '';
+    document.getElementById('evalBtn').disabled = true;
+    document.getElementById('timer').textContent = '0:00';
+    document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
+    recordingSeconds = 0;
+  }
+
+  // ─────────────── 스피치 평가 ───────────────
+  async function evaluateSpeech() {
+    const transcript = finalTranscript.trim();
+    if (!transcript) return showError('evalError', '인식된 텍스트가 없습니다. 먼저 녹음해주세요.');
+
+    const btn = document.getElementById('evalBtn');
+    const loadingEl = document.getElementById('evalLoading');
+    const errorEl = document.getElementById('evalError');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 분석 중...';
+    loadingEl.classList.add('show');
+    errorEl.classList.remove('show');
+
+    const body = { topic: currentTopic, transcript };
+
+    // 오디오 파일도 함께 전송 (Gemini 음성 분석용, 선택적)
+    if (audioBlob && audioBlob.size < 3 * 1024 * 1024) {
+      try {
+        const b64 = await blobToBase64(audioBlob);
+        body.audioBase64 = b64.split(',')[1];
+        body.audioMimeType = audioBlob.type;
+      } catch {}
+    }
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error);
+
+      displayResults(data);
+    } catch (e) {
+      showError('evalError', e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '📊 논리 구조 평가';
+      loadingEl.classList.remove('show');
+    }
+  }
+
+  // ─────────────── 결과 표시 ───────────────
+  const CRITERIA = ['두괄식', '근거', '예시', '결론', '전달력'];
+  const BORDER_COLORS = ['#2563EB', '#7C3AED', '#0891B2', '#059669', '#D97706'];
+
+  function displayResults(result) {
+    const section = document.getElementById('resultsSection');
+    section.classList.add('show');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const scores = result.scores || {};
+    const feedback = result.feedback || {};
+
+    // 점수 카드
+    const grid = document.getElementById('scoresGrid');
+    grid.innerHTML = CRITERIA.map(c => {
+      const v = scores[c] ?? 0;
+      const cls = v >= 75 ? 'high' : v >= 50 ? 'mid' : 'low';
+      return `<div class="score-card">
+        <div class="score-label">${c}</div>
+        <div class="score-value ${cls}">${v}</div>
+      </div>`;
+    }).join('');
+
+    // 레이더 차트
+    const vals = CRITERIA.map(c => scores[c] ?? 0);
+    updateRadarChart(vals);
+
+    // 항목별 피드백
+    const feedbackList = document.getElementById('feedbackList');
+    feedbackList.innerHTML = CRITERIA.map((c, i) => `
+      <div class="feedback-item" style="border-left-color:${BORDER_COLORS[i]}">
+        <h4>${c} — ${scores[c] ?? 0}점</h4>
+        <p>${escHtml(feedback[c] || '피드백 없음')}</p>
+      </div>
+    `).join('');
+
+    // 종합 평가
+    document.getElementById('overallText').textContent = result.overall || '';
+  }
+
+  function updateRadarChart(values) {
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    if (radarChart) radarChart.destroy();
+
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: CRITERIA,
+        datasets: [{
+          label: '스피치 점수',
+          data: values,
+          backgroundColor: 'rgba(37, 99, 235, 0.15)',
+          borderColor: '#2563EB',
+          borderWidth: 2,
+          pointBackgroundColor: '#2563EB',
+          pointRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            ticks: { stepSize: 20, font: { size: 10 } },
+            pointLabels: { font: { size: 13, weight: '700' }, color: '#1E293B' }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function resetEval() {
+    document.getElementById('resultsSection').classList.remove('show');
+    clearTranscript();
+    document.getElementById('recordCard').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ─────────────── 유틸 ───────────────
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = '❌ ' + msg;
+    el.classList.add('show');
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+</script>
+</body>
+</html>
