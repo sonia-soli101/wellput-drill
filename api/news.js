@@ -39,7 +39,7 @@ async function getDomesticRaw(apiKey) {
   }));
   let filtered = filterAI(raw);
   console.log('[국내뉴스] 1단계: 수집', raw.length, '건, AI필터 후', filtered.length, '건');
-  if (filtered.length >= 1) return filtered.slice(0, 5);
+  if (filtered.length >= 1) return filtered.slice(0, 3);
 
   // 2단계: country 제거 + timeframe 확장
   raw = await fetchNews(buildQuery(LATEST, {
@@ -48,7 +48,7 @@ async function getDomesticRaw(apiKey) {
   }));
   filtered = filterAI(raw);
   console.log('[국내뉴스] 2단계: 수집', raw.length, '건, AI필터 후', filtered.length, '건');
-  if (filtered.length >= 1) return filtered.slice(0, 5);
+  if (filtered.length >= 1) return filtered.slice(0, 3);
 
   // 3단계: 기술 일반 키워드 확장 (AI 필터 우선, 없으면 원본 반환)
   raw = await fetchNews(buildQuery(LATEST, {
@@ -57,7 +57,7 @@ async function getDomesticRaw(apiKey) {
   }));
   filtered = filterAI(raw);
   console.log('[국내뉴스] 3단계: 수집', raw.length, '건, AI필터 후', filtered.length, '건');
-  return (filtered.length > 0 ? filtered : raw).slice(0, 5);
+  return (filtered.length > 0 ? filtered : raw).slice(0, 3);
 }
 
 // 국외 뉴스: 단계적 폴백
@@ -69,7 +69,7 @@ async function getInternationalRaw(apiKey) {
     category: 'technology', size: 10, prioritydomain: 'top'
   }));
   console.log('[국외뉴스] 1단계:', results.length, '건');
-  if (results.length >= 5) return results.slice(0, 5);
+  if (results.length >= 5) return results.slice(0, 3);
 
   // 2단계: country 제거 + timeframe 확장
   results = await fetchNews(buildQuery(LATEST, {
@@ -77,7 +77,7 @@ async function getInternationalRaw(apiKey) {
     q: 'artificial intelligence OR machine learning', timeframe: 7, size: 10
   }));
   console.log('[국외뉴스] 2단계:', results.length, '건');
-  return results.slice(0, 5);
+  return results.slice(0, 3);
 }
 
 function parseArticles(results) {
@@ -153,7 +153,11 @@ async function analyzeOneArticle(article, GEMINI_API_KEY) {
 async function analyzeArticles(rawList, GEMINI_API_KEY) {
   if (rawList.length === 0) return [];
 
-  const analyses = await Promise.all(rawList.map(a => analyzeOneArticle(a, GEMINI_API_KEY)));
+  const analyses = [];
+  for (let i = 0; i < rawList.length; i++) {
+    analyses.push(await analyzeOneArticle(rawList[i], GEMINI_API_KEY));
+    if (i < rawList.length - 1) await new Promise(r => setTimeout(r, 1500));
+  }
 
   return rawList.map((a, i) => ({
     title:    a.title,
