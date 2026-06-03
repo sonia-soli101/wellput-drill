@@ -15,7 +15,7 @@ const GEMINI_API_KEY  = process.env.GEMINI_API_KEY;
 const NEWSDATA_API_KEY = process.env.NEWSDATA_API_KEY;
 
 const NEWSDATA_BASE = 'https://newsdata.io/api/1/latest';
-const GEMINI_URL    = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_URL    = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
 // ── 키워드 필터 ──────────────────────────────────────────────
 const DOMESTIC_KW = ['인공지능', 'AI', 'ChatGPT', 'LLM', '딥러닝', '머신러닝', '생성AI', '챗GPT', '거대언어모델'];
@@ -86,15 +86,15 @@ async function analyzeArticle(article) {
     insight:  '원문을 확인해주세요.'
   });
 
-  const prompt = `아래 뉴스 기사를 한국어로 분석해주세요.
+  const prompt = `아래 내용을 기사 제목과 설명을 바탕으로 원문을 읽지 않아도 충분히 이해할 수 있도록 최대 10문장으로 상세하게 한국어로 요약해주세요.
 제목: ${article.title}
 내용: ${article.description || '(내용 없음)'}
 
 아래 JSON 형식으로만 답하세요:
 {
-  "summary": "한글 요약 (최대 10문장, 핵심 내용 상세히)",
-  "keywords": ["키워드1", "키워드2", "키워드3"],
-  "insight": "핵심 인사이트 1~2문장"
+  "summary": "최대 10문장으로 상세한 한국어 요약",
+  "keywords": ["키워드1", "키워드2", "키워드3", "키워드4", "키워드5"],
+  "insight": "핵심 인사이트 2~3문장"
 }`;
 
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -111,7 +111,7 @@ async function analyzeArticle(article) {
       if (!res.ok) {
         const errText = await res.text();
         console.error(`  [Gemini] ${attempt}차 HTTP ${res.status}:`, errText.slice(0, 200));
-        if (attempt < 2) { await sleep(2000); continue; }
+        if (attempt < 2) { await sleep(5000); continue; }
         return titleFallback();
       }
 
@@ -126,7 +126,7 @@ async function analyzeArticle(article) {
       };
     } catch (err) {
       console.error(`  [Gemini] ${attempt}차 예외:`, err.message);
-      if (attempt < 2) { await sleep(2000); continue; }
+      if (attempt < 2) { await sleep(5000); continue; }
       return titleFallback();
     }
   }
@@ -150,8 +150,8 @@ async function processArticles(rawList) {
       insight:  analysis.insight
     });
     if (i < rawList.length - 1) {
-      console.log('  (2초 대기...)');
-      await sleep(2000);
+      console.log('  (3초 대기...)');
+      await sleep(3000);
     }
   }
   return results;
