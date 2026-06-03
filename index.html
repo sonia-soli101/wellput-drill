@@ -529,8 +529,11 @@
   <div class="mode-content active card" id="mode-news">
     <div class="card-title">📰 최신 AI 뉴스</div>
     <div class="flex gap-8">
-      <button class="btn btn-primary" id="loadNewsBtn" onclick="loadNews()">
-        🔄 뉴스 불러오기
+      <button class="btn btn-primary" id="loadDomesticBtn" onclick="loadDomesticNews()" style="flex:1">
+        🇰🇷 국내뉴스 불러오기
+      </button>
+      <button class="btn btn-teal" id="loadIntlBtn" onclick="loadInternationalNews()" style="flex:1">
+        🌐 국외뉴스 불러오기
       </button>
     </div>
     <p class="loading-text" id="newsLoading">뉴스를 가져오는 중...</p>
@@ -749,39 +752,72 @@
   }
 
   // ─────────────── 뉴스 모드 ───────────────
-  async function loadNews() {
-    const btn = document.getElementById('loadNewsBtn');
+  async function loadDomesticNews() {
+    const btn = document.getElementById('loadDomesticBtn');
     const loadingEl = document.getElementById('newsLoading');
-    const errorEl = document.getElementById('newsError');
+    const errorEl   = document.getElementById('newsError');
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> 불러오는 중...';
     loadingEl.classList.add('show');
     errorEl.classList.remove('show');
     document.getElementById('domesticList').innerHTML = '';
-    document.getElementById('internationalList').innerHTML = '';
 
     try {
-      const res = await fetch('/api/news');
+      const res  = await fetch('/api/news?type=domestic');
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || '뉴스를 가져올 수 없습니다.');
+      if (!res.ok || data.error) throw new Error(data.error || '국내 뉴스를 가져올 수 없습니다.');
 
-      domesticArticles     = data.domestic      || [];
-      internationalArticles = data.international || [];
+      domesticArticles = data.domestic || [];
       selectedNewsLinks.clear();
 
-      renderNewsList(domesticArticles,      'domesticList',      'd_');
-      renderNewsList(internationalArticles, 'internationalList', 'i_');
-
+      renderNewsList(domesticArticles, 'domesticList', 'd_');
       document.getElementById('newsTypeTabs').style.display = '';
       setNewsTab('domestic');
-      document.getElementById('newsTopicBtnWrap').style.display = '';
+      if (domesticArticles.length > 0 || internationalArticles.length > 0) {
+        document.getElementById('newsTopicBtnWrap').style.display = '';
+      }
     } catch (e) {
       errorEl.textContent = '❌ ' + e.message;
       errorEl.classList.add('show');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '🔄 뉴스 불러오기';
+      btn.innerHTML = '🇰🇷 국내뉴스 불러오기';
+      loadingEl.classList.remove('show');
+    }
+  }
+
+  async function loadInternationalNews() {
+    const btn = document.getElementById('loadIntlBtn');
+    const loadingEl = document.getElementById('newsLoading');
+    const errorEl   = document.getElementById('newsError');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 불러오는 중...';
+    loadingEl.classList.add('show');
+    errorEl.classList.remove('show');
+    document.getElementById('internationalList').innerHTML = '';
+
+    try {
+      const res  = await fetch('/api/news?type=international');
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || '국외 뉴스를 가져올 수 없습니다.');
+
+      internationalArticles = data.international || [];
+      selectedNewsLinks.clear();
+
+      renderNewsList(internationalArticles, 'internationalList', 'i_');
+      document.getElementById('newsTypeTabs').style.display = '';
+      setNewsTab('international');
+      if (domesticArticles.length > 0 || internationalArticles.length > 0) {
+        document.getElementById('newsTopicBtnWrap').style.display = '';
+      }
+    } catch (e) {
+      errorEl.textContent = '❌ ' + e.message;
+      errorEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '🌐 국외뉴스 불러오기';
       loadingEl.classList.remove('show');
     }
   }
