@@ -1,7 +1,7 @@
 // 국내/국외 각각 별도 캐시 (1시간)
 let cacheD = { articles: [], timestamp: 0 };
 let cacheI = { articles: [], timestamp: 0 };
-const CACHE_TTL = 60 * 60 * 1000;
+const CACHE_TTL = 6 * 60 * 60 * 1000;
 
 const LATEST = 'https://newsdata.io/api/1/latest';
 
@@ -81,60 +81,63 @@ function parseArticles(results) {
   }));
 }
 
-// Gemini로 기사 분석 후 최종 article 배열 반환
-async function analyzeArticles(rawList, GEMINI_API_KEY) {
-  if (rawList.length === 0) return [];
+// 기사 1개를 Gemini로 개별 분석
+async function analyzeOneArticle(article, GEMINI_API_KEY) {
+  const FALLBACK = { summary: '분석 중 오류 발생', keywords: [], insight: '분석 중 오류 발생' };
 
-  const articleTexts = rawList
-    .map((a, i) => `기사 ${i + 1}:\n제목: ${a.title}\n내용: ${a.description || '(내용 없음)'}`)
-    .join('\n\n');
+  const prompt = `아래 뉴스 기사를 한국어로 분석해주세요.
+제목: ${article.title}
+내용: ${article.description || '(내용 없음)'}
 
-  const prompt = `다음 AI 관련 뉴스 기사들을 각각 한국어로 분석해주세요.
-한국어 기사도 영어 기사도 모두 한국어로 요약하세요. 내용이 없으면 제목 기반으로 추론하세요.
+아래 JSON 형식으로만 답하세요:
+{
+  "summary": "한글 요약 3~4문장",
+  "keywords": ["키워드1", "키워드2", "키워드3"],
+  "insight": "핵심 인사이트 1~2문장"
+}`;
 
-${articleTexts}
-
-반드시 아래 JSON 배열 형식으로만 응답하세요 (기사 순서 유지, 총 ${rawList.length}개 항목):
-[
-  {
-    "summary": "핵심 내용 2~3문장 한국어 요약",
-    "keywords": ["핵심키워드1", "핵심키워드2", "핵심키워드3"],
-    "insight": "이 기사가 시사하는 핵심 인사이트 1문장"
-  }
-]`;
-
-  let analyses = rawList.map(() => ({ summary: '', keywords: [], insight: '' }));
   try {
-    const geminiRes = await fetch(
+    const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 2000, responseMimeType: 'application/json' }
+          generationConfig: { temperature: 0.3, maxOutputTokens: 500, responseMimeType: 'application/json' }
         })
       }
     );
-    if (geminiRes.ok) {
-      const gd = await geminiRes.json();
-      const raw = gd.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
-      try { analyses = JSON.parse(raw); } catch {}
-    }
-  } catch {}
+    if (!res.ok) return FALLBACK;
 
-  return rawList.map((a, i) => {
-    const an = analyses[i] || {};
+    const data = await res.json();
+    const raw  = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const parsed = JSON.parse(raw);
     return {
-      title:    a.title,
-      source:   a.source,
-      pubDate:  a.pubDate,
-      link:     a.link,
-      summary:  an.summary  || '',
-      keywords: Array.isArray(an.keywords) ? an.keywords : [],
-      insight:  an.insight  || ''
+      summary:  parsed.summary  || FALLBACK.summary,
+      keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
+      insight:  parsed.insight  || FALLBACK.insight
     };
-  });
+  } catch {
+    return FALLBACK;
+  }
+}
+
+// 기사 목록 전체를 개별 Gemini 호출로 병렬 분석
+async function analyzeArticles(rawList, GEMINI_API_KEY) {
+  if (rawList.length === 0) return [];
+
+  const analyses = await Promise.all(rawList.map(a => analyzeOneArticle(a, GEMINI_API_KEY)));
+
+  return rawList.map((a, i) => ({
+    title:    a.title,
+    source:   a.source,
+    pubDate:  a.pubDate,
+    link:     a.link,
+    summary:  analyses[i].summary,
+    keywords: analyses[i].keywords,
+    insight:  analyses[i].insight
+  }));
 }
 
 module.exports = async function handler(req, res) {
