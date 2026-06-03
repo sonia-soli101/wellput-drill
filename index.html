@@ -314,7 +314,70 @@
       gap: 10px;
       margin-bottom: 20px;
     }
-    @media (max-width: 600px) { .scores-grid { grid-template-columns: repeat(2, 1fr); } }
+    /* ══ 모바일 (~ 767px) ══ */
+    @media (max-width: 767px) {
+      header { padding: 14px 16px; }
+      header .logo { font-size: 22px; }
+      header h1 { font-size: 17px; }
+      header p  { display: none; }
+
+      main { padding: 14px 12px 40px; }
+      .card { padding: 16px 14px; margin-bottom: 14px; }
+      .card-title { font-size: 12px; }
+
+      /* 모드 탭 — 3개가 한 줄에 작게 */
+      .mode-tabs { padding: 4px; gap: 4px; }
+      .tab-btn { font-size: 11px; padding: 8px 2px; }
+
+      /* 버튼 그룹 줄바꿈 */
+      .flex.gap-8 { flex-wrap: wrap; }
+      .btn { font-size: 13px; padding: 9px 14px; }
+
+      /* 국내/국외·인풋 탭 */
+      .input-tabs { flex-wrap: wrap; gap: 6px; }
+      .input-tab  { font-size: 12px; padding: 6px 12px; }
+
+      /* 뉴스 카드 */
+      .news-item h4 { font-size: 13px; }
+      .analysis-tag { font-size: 10px; padding: 2px 5px; }
+      .analysis-text { font-size: 12px; }
+      .news-source, .news-date { font-size: 10px; }
+
+      /* 용어 칩 */
+      .term-chip { padding: 5px 10px; font-size: 12px; }
+
+      /* 주제 카드 */
+      #topicText { font-size: 15px; }
+
+      /* 녹음 */
+      #recordBtn { width: 68px; height: 68px; font-size: 26px; }
+      #timer { font-size: 24px; }
+      #recordStatus { font-size: 12px; }
+      #transcriptBox { font-size: 13px; min-height: 64px; }
+
+      /* 점수 카드 */
+      .scores-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .score-card { padding: 10px 6px; }
+      .score-value { font-size: 22px; }
+      .score-label { font-size: 10px; }
+
+      /* 레이더 차트 */
+      .chart-wrap { max-width: 260px; }
+
+      /* 피드백 */
+      .feedback-item { padding: 10px 12px; }
+      .feedback-item h4 { font-size: 12px; }
+      .feedback-item p  { font-size: 12px; }
+      .overall-box { font-size: 13px; padding: 14px; }
+    }
+
+    /* ══ 태블릿 (768px ~ 1023px) ══ */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      main { padding: 20px 20px 44px; }
+      .card { padding: 20px; }
+      .scores-grid { grid-template-columns: repeat(5, 1fr); }
+      .chart-wrap { max-width: 300px; }
+    }
 
     .score-card {
       background: var(--bg);

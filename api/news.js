@@ -24,20 +24,22 @@ function buildQuery(base, params) {
 
 // 국내 뉴스: 단계적 폴백 (최소 1개 보장)
 async function getDomesticRaw(apiKey) {
-  const BASE = { apikey: apiKey, q: 'AI 인공지능', language: 'ko', country: 'kr', size: 10 };
-
-  // 1단계: 오늘 국내 뉴스 (country=kr, language=ko)
-  let results = await fetchNews(buildQuery(LATEST, BASE));
+  // 1단계: language=ko, country=kr, q=AI
+  let url = buildQuery(LATEST, { apikey: apiKey, q: 'AI', language: 'ko', country: 'kr', size: 10 });
+  let results = await fetchNews(url);
+  console.log('[국내뉴스] 1단계 응답:', results.length, '건 / URL:', url);
   if (results.length >= 1) return results.slice(0, 5);
 
-  // 2단계: 최근 7일로 확장 (timeframe=7d, country=kr 유지)
-  results = await fetchNews(buildQuery(LATEST, { ...BASE, timeframe: '7d' }));
+  // 2단계: language=ko, q=AI, timeframe=7 (country 제거)
+  url = buildQuery(LATEST, { apikey: apiKey, q: 'AI', language: 'ko', timeframe: 7, size: 10 });
+  results = await fetchNews(url);
+  console.log('[국내뉴스] 2단계 응답:', results.length, '건 / URL:', url);
   if (results.length >= 1) return results.slice(0, 5);
 
-  // 3단계: country 조건 제거 (language=ko 전체)
-  results = await fetchNews(buildQuery(LATEST, {
-    apikey: apiKey, q: 'AI 인공지능', language: 'ko', size: 10
-  }));
+  // 3단계: language=ko, q=인공지능, timeframe=7
+  url = buildQuery(LATEST, { apikey: apiKey, q: '인공지능', language: 'ko', timeframe: 7, size: 10 });
+  results = await fetchNews(url);
+  console.log('[국내뉴스] 3단계 응답:', results.length, '건 / URL:', url);
   return results.slice(0, 5);
 }
 
