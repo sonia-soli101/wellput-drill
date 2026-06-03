@@ -2,6 +2,84 @@
 let cache = { domestic: [], international: [], timestamp: 0 };
 const CACHE_TTL = 60 * 60 * 1000;
 
+const LATEST  = 'https://newsdata.io/api/1/latest';
+const ARCHIVE = 'https://newsdata.io/api/1/news';
+
+// NewsData.io 호출 → 결과 배열 반환 (실패 시 [])
+async function fetchNews(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.status === 'success' ? (data.results || []) : [];
+  } catch {
+    return [];
+  }
+}
+
+function buildQuery(base, params) {
+  const p = new URLSearchParams(params);
+  return `${base}?${p.toString()}`;
+}
+
+// 국내 뉴스: 단계적 폴백
+async function getDomesticRaw(apiKey) {
+  // 1단계: 오늘 국내 뉴스 (language=ko, country=kr)
+  let results = await fetchNews(buildQuery(LATEST, {
+    apikey: apiKey, q: 'AI 인공지능', language: 'ko', country: 'kr',
+    size: 10, prioritydomain: 'top'
+  }));
+  if (results.length >= 5) return results.slice(0, 5);
+
+  // 2단계: country 조건 제거 (language=ko 전체)
+  results = await fetchNews(buildQuery(LATEST, {
+    apikey: apiKey, q: 'AI 인공지능', language: 'ko',
+    size: 10, prioritydomain: 'top'
+  }));
+  if (results.length >= 5) return results.slice(0, 5);
+
+  // 3단계: 최근 7일 아카이브로 확장
+  const archiveResults = await fetchNews(buildQuery(ARCHIVE, {
+    apikey: apiKey, q: 'AI 인공지능', language: 'ko',
+    size: 5
+  }));
+  // 두 결과 합산 후 중복 제거, 최신순 5개
+  const merged = [...results, ...archiveResults];
+  const seen = new Set();
+  return merged.filter(a => {
+    if (!a.link || seen.has(a.link)) return false;
+    seen.add(a.link);
+    return true;
+  }).slice(0, 5);
+}
+
+// 국외 뉴스: 단계적 폴백
+async function getInternationalRaw(apiKey) {
+  // 1단계: 오늘 국외 뉴스 (language=en, country=us,gb)
+  let results = await fetchNews(buildQuery(LATEST, {
+    apikey: apiKey, q: 'artificial intelligence LLM', language: 'en',
+    country: 'us,gb', size: 10, prioritydomain: 'top'
+  }));
+  if (results.length >= 5) return results.slice(0, 5);
+
+  // 2단계: country 조건 제거 (language=en 전체)
+  results = await fetchNews(buildQuery(LATEST, {
+    apikey: apiKey, q: 'artificial intelligence LLM', language: 'en',
+    size: 10
+  }));
+  return results.slice(0, 5);
+}
+
+function parseArticles(results) {
+  return (results || []).map(a => ({
+    title:       a.title       || '',
+    description: a.description || '',
+    link:        a.link        || '',
+    pubDate:     a.pubDate     || '',
+    source:      a.source_id   || ''
+  }));
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -14,36 +92,23 @@ module.exports = async function handler(req, res) {
   if (!NEWSDATA_API_KEY) return res.status(500).json({ error: 'NEWSDATA_API_KEY가 설정되지 않았습니다.' });
   if (!GEMINI_API_KEY)   return res.status(500).json({ error: 'GEMINI_API_KEY가 설정되지 않았습니다.' });
 
-  // 캐시가 유효하면 즉시 반환
+  // 캐시 유효 시 즉시 반환
   if (Date.now() - cache.timestamp < CACHE_TTL && cache.domestic.length > 0) {
     return res.status(200).json({ domestic: cache.domestic, international: cache.international, cached: true });
   }
 
   try {
-    const BASE = 'https://newsdata.io/api/1/latest';
-
-    // 국내/국외 뉴스 병렬 수집
-    const [domesticRes, intlRes] = await Promise.all([
-      fetch(`${BASE}?apikey=${NEWSDATA_API_KEY}&q=AI+인공지능&language=ko&country=kr&size=5`),
-      fetch(`${BASE}?apikey=${NEWSDATA_API_KEY}&q=artificial+intelligence+LLM&language=en&country=us,gb&size=5`)
+    // 국내/국외 뉴스 병렬 수집 (각각 폴백 로직 포함)
+    const [domesticRaw, intlRaw] = await Promise.all([
+      getDomesticRaw(NEWSDATA_API_KEY).then(parseArticles),
+      getInternationalRaw(NEWSDATA_API_KEY).then(parseArticles)
     ]);
 
-    if (!domesticRes.ok) throw new Error(`국내 뉴스 수집 오류: ${domesticRes.status}`);
-    if (!intlRes.ok)     throw new Error(`국외 뉴스 수집 오류: ${intlRes.status}`);
+    const allRaw = [...domesticRaw, ...intlRaw];
 
-    const [domesticData, intlData] = await Promise.all([domesticRes.json(), intlRes.json()]);
-
-    const parseRaw = (results) => (results || []).map(a => ({
-      title: a.title || '',
-      description: a.description || '',
-      link: a.link || '',
-      pubDate: a.pubDate || '',
-      source: a.source_id || ''
-    }));
-
-    const domesticRaw = parseRaw(domesticData.results);
-    const intlRaw     = parseRaw(intlData.results);
-    const allRaw      = [...domesticRaw, ...intlRaw];
+    if (allRaw.length === 0) {
+      throw new Error('수집된 뉴스가 없습니다. API 키 또는 요금제를 확인해주세요.');
+    }
 
     // Gemini로 전체 기사 일괄 분석 (1회 호출)
     const articleTexts = allRaw
@@ -90,10 +155,10 @@ ${articleTexts}
       rawList.map((a, i) => {
         const an = analyses[offset + i] || {};
         return {
-          title:   a.title,
-          source:  a.source,
-          pubDate: a.pubDate,
-          link:    a.link,
+          title:    a.title,
+          source:   a.source,
+          pubDate:  a.pubDate,
+          link:     a.link,
           summary:  an.summary  || '',
           keywords: Array.isArray(an.keywords) ? an.keywords : [],
           insight:  an.insight  || ''
