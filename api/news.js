@@ -20,64 +20,81 @@ function buildQuery(base, params) {
   return `${base}?${new URLSearchParams(params).toString()}`;
 }
 
-const AI_KW = ['AI', '인공지능', 'ChatGPT', '챗GPT', 'LLM', '딥러닝', '머신러닝', '생성AI', '생성형', '언어모델'];
+// 국내/국외 AI 키워드
+const DOMESTIC_KW = ['인공지능', 'AI', 'ChatGPT', 'LLM', '딥러닝', '머신러닝', '생성AI', '챗GPT', '거대언어모델'];
+const INTL_KW     = ['artificial intelligence', 'AI', 'ChatGPT', 'LLM', 'machine learning', 'deep learning', 'generative AI', 'large language model'];
 
-function filterAI(list) {
+// 키워드 포함 기사 필터
+function filterByKW(list, kwList) {
   return list.filter(a => {
     const text = `${a.title || ''} ${a.description || ''}`.toLowerCase();
-    return AI_KW.some(kw => text.includes(kw.toLowerCase()));
+    return kwList.some(kw => text.includes(kw.toLowerCase()));
   });
 }
 
-// 국내 뉴스: 단계적 폴백 + AI 키워드 필터
+// 키워드 많이 포함된 기사가 상단 (관련도 정렬)
+function sortByRelevance(list, kwList) {
+  return [...list].sort((a, b) => {
+    const score = item => {
+      const text = `${item.title || ''} ${item.description || ''}`.toLowerCase();
+      return kwList.filter(kw => text.includes(kw.toLowerCase())).length;
+    };
+    return score(b) - score(a);
+  });
+}
+
+// 국내 뉴스: AI 필터 + 관련도 정렬, 3개 미만 시 timeframe=7 재시도
 async function getDomesticRaw(apiKey) {
-  // 1단계: AI 핵심 키워드 + technology 카테고리
+  // 1단계: 핵심 AI 키워드 + technology + country=kr
   let raw = await fetchNews(buildQuery(LATEST, {
     apikey: apiKey, language: 'ko', country: 'kr',
     q: '인공지능 OR AI OR ChatGPT OR LLM OR 딥러닝 OR 머신러닝 OR 생성AI',
     category: 'technology', size: 10
   }));
-  let filtered = filterAI(raw);
-  console.log('[국내뉴스] 1단계: 수집', raw.length, '건, AI필터 후', filtered.length, '건');
-  if (filtered.length >= 1) return filtered.slice(0, 3);
+  let filtered = sortByRelevance(filterByKW(raw, DOMESTIC_KW), DOMESTIC_KW);
+  console.log('[국내뉴스] 1단계: 수집', raw.length, '건, 필터 후', filtered.length, '건');
+  if (filtered.length >= 3) return filtered.slice(0, 3);
 
-  // 2단계: country 제거 + timeframe 확장
+  // 2단계: timeframe=7 재시도 (3개 미만)
   raw = await fetchNews(buildQuery(LATEST, {
     apikey: apiKey, language: 'ko',
-    q: '인공지능 OR AI OR ChatGPT OR LLM', timeframe: 7, size: 10
+    q: '인공지능 OR AI OR ChatGPT OR LLM OR 딥러닝 OR 머신러닝', timeframe: 7, size: 10
   }));
-  filtered = filterAI(raw);
-  console.log('[국내뉴스] 2단계: 수집', raw.length, '건, AI필터 후', filtered.length, '건');
-  if (filtered.length >= 1) return filtered.slice(0, 3);
+  filtered = sortByRelevance(filterByKW(raw, DOMESTIC_KW), DOMESTIC_KW);
+  console.log('[국내뉴스] 2단계(timeframe=7): 수집', raw.length, '건, 필터 후', filtered.length, '건');
+  if (filtered.length >= 3) return filtered.slice(0, 3);
 
-  // 3단계: 기술 일반 키워드 확장 (AI 필터 우선, 없으면 원본 반환)
+  // 3단계: 폭넓은 기술 키워드 (최소 보장)
   raw = await fetchNews(buildQuery(LATEST, {
     apikey: apiKey, language: 'ko',
-    q: '테크 OR 기술 OR 스타트업', timeframe: 7, size: 10
+    q: '테크 OR 기술 OR IT OR 스타트업', timeframe: 7, size: 10
   }));
-  filtered = filterAI(raw);
-  console.log('[국내뉴스] 3단계: 수집', raw.length, '건, AI필터 후', filtered.length, '건');
-  return (filtered.length > 0 ? filtered : raw).slice(0, 3);
+  const extra = sortByRelevance(filterByKW(raw, DOMESTIC_KW), DOMESTIC_KW);
+  const combined = [...filtered, ...extra];
+  console.log('[국내뉴스] 3단계: 수집', raw.length, '건, 최종', combined.length, '건');
+  return (combined.length > 0 ? combined : raw).slice(0, 3);
 }
 
-// 국외 뉴스: 단계적 폴백
+// 국외 뉴스: AI 필터 + 관련도 정렬, 3개 미만 시 timeframe=7 재시도
 async function getInternationalRaw(apiKey) {
-  // 1단계: AI 핵심 키워드 + technology 카테고리
-  let results = await fetchNews(buildQuery(LATEST, {
+  // 1단계: 핵심 AI 키워드 + technology + country=us,gb
+  let raw = await fetchNews(buildQuery(LATEST, {
     apikey: apiKey, language: 'en', country: 'us,gb',
-    q: 'artificial intelligence OR AI OR LLM OR ChatGPT',
+    q: 'artificial intelligence OR AI OR LLM OR ChatGPT OR "machine learning"',
     category: 'technology', size: 10, prioritydomain: 'top'
   }));
-  console.log('[국외뉴스] 1단계:', results.length, '건');
-  if (results.length >= 5) return results.slice(0, 3);
+  let filtered = sortByRelevance(filterByKW(raw, INTL_KW), INTL_KW);
+  console.log('[국외뉴스] 1단계: 수집', raw.length, '건, 필터 후', filtered.length, '건');
+  if (filtered.length >= 3) return filtered.slice(0, 3);
 
-  // 2단계: country 제거 + timeframe 확장
-  results = await fetchNews(buildQuery(LATEST, {
+  // 2단계: timeframe=7 재시도 (3개 미만)
+  raw = await fetchNews(buildQuery(LATEST, {
     apikey: apiKey, language: 'en',
-    q: 'artificial intelligence OR machine learning', timeframe: 7, size: 10
+    q: 'artificial intelligence OR machine learning OR deep learning OR LLM', timeframe: 7, size: 10
   }));
-  console.log('[국외뉴스] 2단계:', results.length, '건');
-  return results.slice(0, 3);
+  filtered = sortByRelevance(filterByKW(raw, INTL_KW), INTL_KW);
+  console.log('[국외뉴스] 2단계(timeframe=7): 수집', raw.length, '건, 필터 후', filtered.length, '건');
+  return (filtered.length > 0 ? filtered : raw).slice(0, 3);
 }
 
 function parseArticles(results) {
@@ -98,9 +115,13 @@ function cleanJSON(text) {
   return text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
 }
 
-// 기사 1개를 Gemini로 개별 분석 (실패 시 1회 재시도)
+// 기사 1개를 Gemini로 개별 분석 (실패 시 2초 후 1회 재시도)
 async function analyzeOneArticle(article, GEMINI_API_KEY) {
-  const FALLBACK = { summary: '분석 중 오류 발생', keywords: [], insight: '분석 중 오류 발생' };
+  const titleFallback = () => ({
+    summary:  `${article.title}에 관한 기사입니다.`,
+    keywords: ['AI'],
+    insight:  '원문을 확인해주세요.'
+  });
 
   const prompt = `아래 뉴스 기사를 한국어로 분석해주세요.
 제목: ${article.title}
@@ -127,8 +148,8 @@ async function analyzeOneArticle(article, GEMINI_API_KEY) {
       if (!res.ok) {
         const errText = await res.text();
         console.error(`[Gemini] ${attempt}차 HTTP ${res.status} (${article.title}):`, errText.slice(0, 300));
-        if (attempt < 2) { await new Promise(r => setTimeout(r, 1000)); continue; }
-        return FALLBACK;
+        if (attempt < 2) { await new Promise(r => setTimeout(r, 2000)); continue; }
+        return titleFallback();
       }
 
       const data   = await res.json();
@@ -136,28 +157,24 @@ async function analyzeOneArticle(article, GEMINI_API_KEY) {
       const parsed = JSON.parse(cleanJSON(raw));
 
       return {
-        summary:  parsed.summary  || FALLBACK.summary,
-        keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
-        insight:  parsed.insight  || FALLBACK.insight
+        summary:  parsed.summary  || titleFallback().summary,
+        keywords: Array.isArray(parsed.keywords) ? parsed.keywords : ['AI'],
+        insight:  parsed.insight  || titleFallback().insight
       };
     } catch (err) {
       console.error(`[Gemini] ${attempt}차 예외 (${article.title}):`, err.message);
-      if (attempt < 2) { await new Promise(r => setTimeout(r, 1000)); continue; }
-      return FALLBACK;
+      if (attempt < 2) { await new Promise(r => setTimeout(r, 2000)); continue; }
+      return titleFallback();
     }
   }
-  return FALLBACK;
+  return titleFallback();
 }
 
-// 기사 목록 전체를 개별 Gemini 호출로 병렬 분석
+// 기사 목록 전체를 병렬 분석 (각 기사별 독립 재시도)
 async function analyzeArticles(rawList, GEMINI_API_KEY) {
   if (rawList.length === 0) return [];
 
-  const analyses = [];
-  for (let i = 0; i < rawList.length; i++) {
-    analyses.push(await analyzeOneArticle(rawList[i], GEMINI_API_KEY));
-    if (i < rawList.length - 1) await new Promise(r => setTimeout(r, 1500));
-  }
+  const analyses = await Promise.all(rawList.map(a => analyzeOneArticle(a, GEMINI_API_KEY)));
 
   return rawList.map((a, i) => ({
     title:    a.title,
