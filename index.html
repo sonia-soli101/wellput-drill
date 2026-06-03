@@ -146,9 +146,18 @@
     }
     .news-item:hover { border-color: var(--blue); background: var(--blue-light); }
     .news-item.selected { border-color: var(--blue); background: var(--blue-light); }
-    .news-item h4 { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
-    .news-item p  { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
-    .news-source { font-size: 11px; color: var(--teal); margin-top: 4px; font-weight: 500; }
+    .news-link { text-decoration: none; display: block; }
+    .news-link:hover h4 { color: var(--blue); }
+    .news-item h4 { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; transition: color .2s; }
+    .news-meta { display: flex; gap: 10px; margin-top: 5px; }
+    .news-source { font-size: 11px; color: var(--teal); font-weight: 600; }
+    .news-date   { font-size: 11px; color: var(--muted); }
+    .news-analysis { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+    .analysis-row { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.5; }
+    .analysis-tag { flex-shrink: 0; font-size: 11px; font-weight: 700; color: white; background: var(--blue); padding: 2px 7px; border-radius: 4px; margin-top: 2px; }
+    .analysis-tag.kw  { background: var(--purple); }
+    .analysis-tag.ins { background: var(--teal); }
+    .analysis-text { color: var(--muted); }
 
     /* ── AI 용어 칩 ── */
     .term-grid {
@@ -410,7 +419,12 @@
     </div>
     <p class="loading-text" id="newsLoading">뉴스를 가져오는 중...</p>
     <div class="error-box" id="newsError"></div>
-    <div class="news-list" id="newsList"></div>
+    <div class="input-tabs mt-12" id="newsTypeTabs" style="display:none">
+      <button class="input-tab active" id="tab-domestic"      onclick="setNewsTab('domestic')">🇰🇷 국내 뉴스</button>
+      <button class="input-tab"        id="tab-international" onclick="setNewsTab('international')">🌍 국외 뉴스</button>
+    </div>
+    <div class="news-list" id="domesticList"></div>
+    <div class="news-list" id="internationalList" style="display:none"></div>
   </div>
 
   <!-- ════════════ AI 용어 모드 ════════════ -->
@@ -532,7 +546,10 @@
   // ─────────────── 상태 ───────────────
   let currentMode = 'news';
   let currentTopic = '';
-  let newsArticles = [];
+  let domesticArticles = [];
+  let internationalArticles = [];
+  let currentNewsTab = 'domestic';
+  let selectedNewsLinks = new Set();
   let selectedTerm = null;
   let customSummary = '';
   let customInputType = 'url';
@@ -593,21 +610,28 @@
     const btn = document.getElementById('loadNewsBtn');
     const loadingEl = document.getElementById('newsLoading');
     const errorEl = document.getElementById('newsError');
-    const listEl = document.getElementById('newsList');
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> 불러오는 중...';
     loadingEl.classList.add('show');
     errorEl.classList.remove('show');
-    listEl.innerHTML = '';
+    document.getElementById('domesticList').innerHTML = '';
+    document.getElementById('internationalList').innerHTML = '';
 
     try {
       const res = await fetch('/api/news');
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || '뉴스를 가져올 수 없습니다.');
 
-      newsArticles = data.articles;
-      renderNewsList(newsArticles);
+      domesticArticles     = data.domestic      || [];
+      internationalArticles = data.international || [];
+      selectedNewsLinks.clear();
+
+      renderNewsList(domesticArticles,      'domesticList',      'd_');
+      renderNewsList(internationalArticles, 'internationalList', 'i_');
+
+      document.getElementById('newsTypeTabs').style.display = '';
+      setNewsTab('domestic');
       document.getElementById('newsTopicBtn').disabled = false;
     } catch (e) {
       errorEl.textContent = '❌ ' + e.message;
@@ -619,34 +643,63 @@
     }
   }
 
-  function renderNewsList(articles) {
-    const listEl = document.getElementById('newsList');
-    listEl.innerHTML = articles.map((a, i) => `
-      <div class="news-item" onclick="selectNews(${i})" id="news-${i}">
-        <h4>${escHtml(a.title)}</h4>
-        ${a.description ? `<p>${escHtml(a.description.slice(0, 120))}${a.description.length > 120 ? '...' : ''}</p>` : ''}
-        <div class="news-source">${escHtml(a.source)} · ${escHtml(a.pubDate?.slice(0, 10) || '')}</div>
-      </div>
-    `).join('');
+  function setNewsTab(tab) {
+    currentNewsTab = tab;
+    selectedNewsLinks.clear();
+    document.querySelectorAll('#newsTypeTabs .input-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById('domesticList').style.display      = tab === 'domestic'      ? '' : 'none';
+    document.getElementById('internationalList').style.display = tab === 'international' ? '' : 'none';
   }
 
-  let selectedNewsIdx = new Set();
-  function selectNews(idx) {
-    const el = document.getElementById(`news-${idx}`);
-    if (selectedNewsIdx.has(idx)) {
-      selectedNewsIdx.delete(idx);
+  function renderNewsList(articles, listId, prefix) {
+    const listEl = document.getElementById(listId);
+    listEl.innerHTML = articles.map((a, i) => {
+      const keywords   = Array.isArray(a.keywords) ? a.keywords.join(', ') : '';
+      const analysisHtml = a.summary ? `
+        <div class="news-analysis">
+          <div class="analysis-row">
+            <span class="analysis-tag">한글요약</span>
+            <span class="analysis-text">${escHtml(a.summary)}</span>
+          </div>
+          <div class="analysis-row">
+            <span class="analysis-tag kw">핵심키워드</span>
+            <span class="analysis-text">${escHtml(keywords)}</span>
+          </div>
+          <div class="analysis-row">
+            <span class="analysis-tag ins">핵심인사이트</span>
+            <span class="analysis-text">${escHtml(a.insight || '')}</span>
+          </div>
+        </div>` : '';
+
+      return `
+      <div class="news-item" onclick="selectNews('${escHtml(a.link)}', this)" id="${prefix}${i}">
+        <a class="news-link" href="${escHtml(a.link)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
+          <h4>${escHtml(a.title)}</h4>
+        </a>
+        <div class="news-meta">
+          <span class="news-source">${escHtml(a.source)}</span>
+          <span class="news-date">${escHtml(a.pubDate?.slice(0, 10) || '')}</span>
+        </div>
+        ${analysisHtml}
+      </div>`;
+    }).join('');
+  }
+
+  function selectNews(link, el) {
+    if (selectedNewsLinks.has(link)) {
+      selectedNewsLinks.delete(link);
       el.classList.remove('selected');
     } else {
-      selectedNewsIdx.add(idx);
+      selectedNewsLinks.add(link);
       el.classList.add('selected');
     }
   }
 
   async function generateNewsTopic() {
-    const articles = selectedNewsIdx.size > 0
-      ? [...selectedNewsIdx].map(i => newsArticles[i])
-      : newsArticles;
-
+    const tabArticles = currentNewsTab === 'domestic' ? domesticArticles : internationalArticles;
+    const selected    = tabArticles.filter(a => selectedNewsLinks.has(a.link));
+    const articles    = selected.length > 0 ? selected : tabArticles;
     await callTopicAPI({ mode: 'news', articles });
   }
 

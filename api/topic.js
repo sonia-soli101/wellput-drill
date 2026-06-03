@@ -14,15 +14,22 @@ module.exports = async function handler(req, res) {
   const { mode, articles, term, summary } = req.body;
   let prompt = '';
 
+  const TOPIC_RULES = `출력 규칙:
+- 반드시 한국어 1문장
+- 찬반 토론 또는 의견 제시가 가능한 질문형 문장
+- 반드시 "~인가?" 또는 "~는가?" 또는 "~할 수 있는가?" 형태로 끝나는 완전한 문장
+- 예시처럼 간결하게: "AI 규제는 혁신을 막는가?", "ChatGPT는 교육에 도움이 되는가?", "AI 발전은 일자리를 위협하는가?"
+- 주제 문장 1개만 출력 (번호, 따옴표, 설명 없이)`;
+
   if (mode === 'news' && articles?.length > 0) {
     const articleText = articles
       .map((a, i) => `${i + 1}. ${a.title}\n${a.description || ''}`)
       .join('\n\n');
-    prompt = `다음 AI 관련 영어 뉴스를 바탕으로 한국어 스피치 연습용 토론 주제 1문장을 만들어주세요.\n\n뉴스:\n${articleText}\n\n요구사항:\n- 반드시 한국어로\n- 의견을 나눌 수 있는 개방형 질문\n- 주제 문장 1개만 출력 (설명 없이)`;
+    prompt = `다음 AI 관련 영어 뉴스를 바탕으로 스피치 연습용 찬반 토론 주제를 한국어 1문장으로 만들어주세요.\n\n뉴스:\n${articleText}\n\n${TOPIC_RULES}`;
   } else if (mode === 'term') {
-    prompt = `AI 용어 "${term}"을 주제로 한국어 스피치 연습용 토론 주제 1문장을 만들어주세요.\n\n요구사항:\n- 반드시 한국어로\n- 의견을 나눌 수 있는 개방형 질문\n- 주제 문장 1개만 출력 (설명 없이)`;
+    prompt = `AI 용어 "${term}"을 주제로 스피치 연습용 찬반 토론 주제를 한국어 1문장으로 만들어주세요.\n\n${TOPIC_RULES}`;
   } else if (mode === 'custom' && summary) {
-    prompt = `다음 내용을 바탕으로 한국어 스피치 연습용 토론 주제 1문장을 만들어주세요.\n\n내용:\n${summary}\n\n요구사항:\n- 반드시 한국어로\n- 의견을 나눌 수 있는 개방형 질문\n- 주제 문장 1개만 출력 (설명 없이)`;
+    prompt = `다음 내용을 바탕으로 스피치 연습용 찬반 토론 주제를 한국어 1문장으로 만들어주세요.\n\n내용:\n${summary}\n\n${TOPIC_RULES}`;
   } else {
     return res.status(400).json({ error: '잘못된 요청입니다.' });
   }
