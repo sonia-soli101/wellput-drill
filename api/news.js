@@ -22,35 +22,23 @@ function buildQuery(base, params) {
   return `${base}?${p.toString()}`;
 }
 
-// 국내 뉴스: 단계적 폴백
+// 국내 뉴스: 단계적 폴백 (최소 1개 보장)
 async function getDomesticRaw(apiKey) {
-  // 1단계: 오늘 국내 뉴스 (language=ko, country=kr)
-  let results = await fetchNews(buildQuery(LATEST, {
-    apikey: apiKey, q: 'AI 인공지능', language: 'ko', country: 'kr',
-    size: 10, prioritydomain: 'top'
-  }));
-  if (results.length >= 5) return results.slice(0, 5);
+  const BASE = { apikey: apiKey, q: 'AI 인공지능', language: 'ko', country: 'kr', size: 10 };
 
-  // 2단계: country 조건 제거 (language=ko 전체)
+  // 1단계: 오늘 국내 뉴스 (country=kr, language=ko)
+  let results = await fetchNews(buildQuery(LATEST, BASE));
+  if (results.length >= 1) return results.slice(0, 5);
+
+  // 2단계: 최근 7일로 확장 (timeframe=7d, country=kr 유지)
+  results = await fetchNews(buildQuery(LATEST, { ...BASE, timeframe: '7d' }));
+  if (results.length >= 1) return results.slice(0, 5);
+
+  // 3단계: country 조건 제거 (language=ko 전체)
   results = await fetchNews(buildQuery(LATEST, {
-    apikey: apiKey, q: 'AI 인공지능', language: 'ko',
-    size: 10, prioritydomain: 'top'
+    apikey: apiKey, q: 'AI 인공지능', language: 'ko', size: 10
   }));
-  if (results.length >= 5) return results.slice(0, 5);
-
-  // 3단계: 최근 7일 아카이브로 확장
-  const archiveResults = await fetchNews(buildQuery(ARCHIVE, {
-    apikey: apiKey, q: 'AI 인공지능', language: 'ko',
-    size: 5
-  }));
-  // 두 결과 합산 후 중복 제거, 최신순 5개
-  const merged = [...results, ...archiveResults];
-  const seen = new Set();
-  return merged.filter(a => {
-    if (!a.link || seen.has(a.link)) return false;
-    seen.add(a.link);
-    return true;
-  }).slice(0, 5);
+  return results.slice(0, 5);
 }
 
 // 국외 뉴스: 단계적 폴백

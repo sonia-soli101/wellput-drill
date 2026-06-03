@@ -14,12 +14,12 @@ module.exports = async function handler(req, res) {
   const { mode, articles, term, summary } = req.body;
   let prompt = '';
 
-  const TOPIC_RULES = `출력 규칙:
-- 반드시 한국어 1문장
-- 찬반 토론 또는 의견 제시가 가능한 질문형 문장
-- 반드시 "~인가?" 또는 "~는가?" 또는 "~할 수 있는가?" 형태로 끝나는 완전한 문장
-- 예시처럼 간결하게: "AI 규제는 혁신을 막는가?", "ChatGPT는 교육에 도움이 되는가?", "AI 발전은 일자리를 위협하는가?"
-- 주제 문장 1개만 출력 (번호, 따옴표, 설명 없이)`;
+  const TOPIC_RULES = `출력 규칙 (반드시 준수):
+- 한국어 질문형 완전한 문장 1개만 출력
+- 반드시 물음표(?)로 끝낼 것 — 이 규칙은 절대 예외 없음
+- 찬반 토론 또는 의견 제시가 가능한 주제
+- 예시: "AI 규제는 혁신을 막는가?", "챗GPT는 교육 현장을 바꿀 수 있는가?", "AI는 인간의 일자리를 대체할 것인가?"
+- 번호, 따옴표, 부가 설명 없이 문장만 출력`;
 
   if (mode === 'news' && articles?.length > 0) {
     const articleText = articles
@@ -53,7 +53,8 @@ module.exports = async function handler(req, res) {
     }
 
     const data = await response.json();
-    const topic = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    let topic = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    if (topic && !topic.endsWith('?')) topic += '?';
     res.status(200).json({ topic });
   } catch (error) {
     res.status(500).json({ error: error.message });
