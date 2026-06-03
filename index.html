@@ -417,7 +417,8 @@
       .prep-label { font-size: 12px; }
       .prep-score { font-size: 18px; }
       .prep-good, .prep-improve { font-size: 12px; padding: 5px 8px; }
-      .chart-wrap { max-width: 260px; }
+      .charts-wrap { grid-template-columns: 1fr; }
+      .chart-card-title { font-size: 12px; }
       .summary-box p, .next-goal-box p { font-size: 13px; }
     }
 
@@ -471,6 +472,16 @@
       box-shadow: 0 2px 8px rgba(124,58,237,.3);
     }
 
+    /* ── 이중 레이더 차트 ── */
+    .charts-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .chart-card { background: var(--bg); border-radius: 10px; padding: 12px 8px; }
+    .chart-card-title { font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+
     /* ── 로딩 ── */
     .spinner {
       display: inline-block;
@@ -499,6 +510,104 @@
     }
     .error-box.show { display: block; }
 
+    /* ── 헤더 도움말 버튼 ── */
+    .help-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.4);
+      background: rgba(255,255,255,.15);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s;
+    }
+    .help-btn:hover { background: rgba(255,255,255,.3); }
+
+    /* ── 도움말 모달 ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .modal-header {
+      position: sticky;
+      top: 0;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1;
+      border-radius: 14px 14px 0 0;
+    }
+    .modal-header h2 { font-size: 15px; font-weight: 700; color: var(--text); }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background .15s;
+      line-height: 1;
+    }
+    .modal-close:hover { background: var(--bg); }
+    .modal-body { padding: 20px; }
+    .modal-intro { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .modal-section { margin-bottom: 0; padding-bottom: 20px; }
+    .modal-section:not(:last-child) { border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .modal-section h3 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+    .modal-criteria { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+    .modal-criterion { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; }
+    .modal-criterion-key {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .modal-criterion-val { color: var(--text); }
+    .modal-source {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-style: italic;
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .modal-source strong { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; font-style: normal; text-transform: uppercase; letter-spacing: .5px; }
+
     /* ── 유틸 ── */
     .flex { display: flex; }
     .gap-8 { gap: 8px; }
@@ -514,7 +623,85 @@
     <h1>Wellput Drill</h1>
     <p>AI 기반 스피치 논리 구조 트레이너</p>
   </div>
+  <button class="help-btn" onclick="openHelpModal()" title="평가 기준 안내">❓</button>
 </header>
+
+<!-- ════════════ 도움말 모달 ════════════ -->
+<div class="modal-overlay" id="helpModal" onclick="handleModalClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>📋 wellput-drill 평가 기준 안내</h2>
+      <button class="modal-close" onclick="closeHelpModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-intro">wellput-drill은 두 가지 검증된 학술 프레임워크를 결합하여 스피치를 평가합니다.</p>
+
+      <!-- 섹션 1: PREP -->
+      <div class="modal-section">
+        <h3>📐 1. PREP 프레임워크 (형식 평가)</h3>
+        <div class="modal-criteria">
+          <div class="modal-criterion">
+            <span class="modal-criterion-key">P</span>
+            <span class="modal-criterion-val"><strong>Point</strong> — 결론을 먼저 말하기 (두괄식)</span>
+          </div>
+          <div class="modal-criterion">
+            <span class="modal-criterion-key">R</span>
+            <span class="modal-criterion-val"><strong>Reason</strong> — 주장을 뒷받침하는 근거 제시</span>
+          </div>
+          <div class="modal-criterion">
+            <span class="modal-criterion-key">E</span>
+            <span class="modal-criterion-val"><strong>Example</strong> — 구체적 사례/데이터 활용</span>
+          </div>
+          <div class="modal-criterion">
+            <span class="modal-criterion-key">P</span>
+            <span class="modal-criterion-val"><strong>Point</strong> — 마지막에 결론 다시 강조</span>
+          </div>
+        </div>
+        <div class="modal-source">
+          <strong>출처</strong>
+          · 아리스토텔레스 《수사학》(Rhetoric, BC 4세기) — 4단계 논증 구조에서 유래<br>
+          · Harvard Business School — OREO 기법으로 교육<br>
+          · 이기주·박소영 (2019). 「프렙(PREP)을 활용한 한 문단 쓰기 수업 모형 연구」. <em>작문연구</em>, 43, 141–171. 한국작문학회
+        </div>
+      </div>
+
+      <!-- 섹션 2: Toulmin -->
+      <div class="modal-section">
+        <h3>💡 2. Toulmin 논증 모델 (내용 평가)</h3>
+        <div class="modal-criteria">
+          <div class="modal-criterion">
+            <span class="modal-criterion-val"><strong>주제 연관성</strong> — 주장이 주제에 맞는가 (Claim)</span>
+          </div>
+          <div class="modal-criterion">
+            <span class="modal-criterion-val"><strong>논리적 타당성</strong> — 근거가 주장을 타당하게 뒷받침하는가 (Warrant)</span>
+          </div>
+          <div class="modal-criterion">
+            <span class="modal-criterion-val"><strong>내용의 깊이</strong> — 증거의 질과 양이 충분한가 (Grounds)</span>
+          </div>
+        </div>
+        <div class="modal-source">
+          <strong>출처</strong>
+          · Toulmin, S. E. (1958). <em>The Uses of Argument</em>. Cambridge University Press.<br>
+          · Simon, S. (2008). Using Toulmin's Argument Pattern in the evaluation of argumentation in school science. <em>Research in Science Education</em>.
+        </div>
+      </div>
+
+      <!-- 섹션 3: 전달 명확성 -->
+      <div class="modal-section">
+        <h3>🗣️ 3. 전달 명확성</h3>
+        <div class="modal-criteria">
+          <div class="modal-criterion">
+            <span class="modal-criterion-val">문장이 명확하고 이해하기 쉬운가</span>
+          </div>
+        </div>
+        <div class="modal-source">
+          <strong>출처</strong>
+          · NCA (National Communication Association). <em>The Competent Speaker Speech Evaluation Form</em> (2nd ed., 1993–2013). 미국 커뮤니케이션학회 공식 스피치 평가 도구
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <main>
 
@@ -538,10 +725,6 @@
     </div>
     <p class="loading-text" id="newsLoading">뉴스를 가져오는 중...</p>
     <div class="error-box" id="newsError"></div>
-    <div class="input-tabs mt-12" id="newsTypeTabs" style="display:none">
-      <button class="input-tab active" id="tab-domestic"      onclick="setNewsTab('domestic')">🇰🇷 국내 뉴스</button>
-      <button class="input-tab"        id="tab-international" onclick="setNewsTab('international')">🌍 국외 뉴스</button>
-    </div>
     <div class="news-list" id="domesticList"></div>
     <div class="news-list" id="internationalList" style="display:none"></div>
     <div class="topic-gen-wrap" id="newsTopicBtnWrap" style="display:none">
@@ -647,7 +830,35 @@
 
   <!-- ════════════ 평가 결과 ════════════ -->
   <div class="card" id="resultsSection">
-    <div class="card-title">📊 PREP 평가 결과</div>
+    <div class="card-title">📊 스피치 평가 결과</div>
+
+    <!-- 레이더 차트 2개 -->
+    <div class="charts-wrap">
+      <div class="chart-card">
+        <div class="chart-card-title" style="color:#7C3AED">📐 PREP 형식 평가</div>
+        <canvas id="prepChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title" style="color:#2563EB">💡 내용 &amp; 전달 평가</div>
+        <canvas id="contentChart"></canvas>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PREP 형식 섹션 -->
+    <div class="card-title" style="color:#7C3AED">📐 PREP 형식</div>
+    <div class="prep-list" id="prepFeedback"></div>
+
+    <!-- 내용 평가 섹션 -->
+    <div class="card-title" style="color:#2563EB;margin-top:16px">💡 내용 평가</div>
+    <div class="prep-list" id="contentFeedback"></div>
+
+    <!-- 전달력 섹션 -->
+    <div class="card-title" style="color:#0891B2;margin-top:16px">🗣️ 전달력</div>
+    <div class="prep-list" id="deliveryFeedback"></div>
+
+    <div class="divider"></div>
 
     <!-- 종합 점수 -->
     <div class="total-score-box">
@@ -657,17 +868,6 @@
         <span class="total-denom">/100</span>
       </div>
     </div>
-
-    <!-- PREP 항목별 평가 -->
-    <div class="card-title">📋 PREP 항목별 평가</div>
-    <div class="prep-list" id="prepList"></div>
-
-    <!-- 레이더 차트 -->
-    <div class="chart-wrap">
-      <canvas id="radarChart"></canvas>
-    </div>
-
-    <div class="divider"></div>
 
     <!-- 총평 -->
     <div class="summary-box">
@@ -710,7 +910,8 @@
   let timerInterval = null;
   let recordingSeconds = 0;
 
-  let radarChart = null;
+  let radarChart1 = null;
+  let radarChart2 = null;
 
   // ─────────────── AI 용어 목록 ───────────────
   const AI_TERMS = [
@@ -772,7 +973,6 @@
       selectedNewsLinks.clear();
 
       renderNewsList(domesticArticles, 'domesticList', 'd_');
-      document.getElementById('newsTypeTabs').style.display = '';
       setNewsTab('domestic');
       if (domesticArticles.length > 0 || internationalArticles.length > 0) {
         document.getElementById('newsTopicBtnWrap').style.display = '';
@@ -807,7 +1007,6 @@
       selectedNewsLinks.clear();
 
       renderNewsList(internationalArticles, 'internationalList', 'i_');
-      document.getElementById('newsTypeTabs').style.display = '';
       setNewsTab('international');
       if (domesticArticles.length > 0 || internationalArticles.length > 0) {
         document.getElementById('newsTopicBtnWrap').style.display = '';
@@ -825,8 +1024,6 @@
   function setNewsTab(tab) {
     currentNewsTab = tab;
     selectedNewsLinks.clear();
-    document.querySelectorAll('#newsTypeTabs .input-tab').forEach(el => el.classList.remove('active'));
-    document.getElementById(`tab-${tab}`).classList.add('active');
     document.getElementById('domesticList').style.display      = tab === 'domestic'      ? '' : 'none';
     document.getElementById('internationalList').style.display = tab === 'international' ? '' : 'none';
   }
@@ -835,21 +1032,21 @@
     const listEl = document.getElementById(listId);
     listEl.innerHTML = articles.map((a, i) => {
       const keywords   = Array.isArray(a.keywords) ? a.keywords.join(', ') : '';
-      const analysisHtml = a.summary ? `
+      const analysisHtml = `
         <div class="news-analysis">
           <div class="analysis-row">
             <span class="analysis-tag">한글요약</span>
-            <span class="analysis-text">${escHtml(a.summary)}</span>
+            <span class="analysis-text">${escHtml(a.summary || '분석 정보 없음')}</span>
           </div>
           <div class="analysis-row">
             <span class="analysis-tag kw">핵심키워드</span>
-            <span class="analysis-text">${escHtml(keywords)}</span>
+            <span class="analysis-text">${escHtml(keywords || '-')}</span>
           </div>
           <div class="analysis-row">
             <span class="analysis-tag ins">핵심인사이트</span>
-            <span class="analysis-text">${escHtml(a.insight || '')}</span>
+            <span class="analysis-text">${escHtml(a.insight || '-')}</span>
           </div>
-        </div>` : '';
+        </div>`;
 
       return `
       <div class="news-item" onclick="selectNews('${escHtml(a.link)}', this)" id="${prefix}${i}">
@@ -1189,32 +1386,24 @@
     }
   }
 
-  // ─────────────── 결과 표시 (PREP) ───────────────
-  const PREP_CRITERIA = [
-    { key: 'point_intro',      label: 'P. 핵심 먼저',  color: '#2563EB' },
-    { key: 'reason',           label: 'R. 논리 근거',  color: '#7C3AED' },
-    { key: 'example',          label: 'E. 구체 예시',  color: '#0891B2' },
-    { key: 'point_conclusion', label: 'P. 명확 결론',  color: '#059669' },
-    { key: 'clarity',          label: '전달 명확성',   color: '#D97706' }
+  // ─────────────── 결과 표시 ───────────────
+  const PREP_GROUP = [
+    { key: 'point_intro',      label: 'P. 두괄식 구조', color: '#7C3AED' },
+    { key: 'reason',           label: 'R. 근거 제시',   color: '#7C3AED' },
+    { key: 'example',          label: 'E. 예시 활용',   color: '#7C3AED' },
+    { key: 'point_conclusion', label: 'P. 결론 마무리', color: '#7C3AED' },
+  ];
+  const CONTENT_GROUP = [
+    { key: 'relevance', label: '주제 연관성', color: '#2563EB' },
+    { key: 'logic',     label: '논리 타당성', color: '#2563EB' },
+    { key: 'depth',     label: '내용 깊이',   color: '#2563EB' },
+  ];
+  const DELIVERY_GROUP = [
+    { key: 'clarity', label: '전달 명확성', color: '#0891B2' },
   ];
 
-  function displayResults(result) {
-    const section = document.getElementById('resultsSection');
-    section.classList.add('show');
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    const scores = result.scores || {};
-    const total  = result.total ?? 0;
-
-    // 종합 점수
-    const totalEl  = document.getElementById('totalScoreNum');
-    const totalCls = total >= 75 ? 'high' : total >= 50 ? 'mid' : 'low';
-    totalEl.textContent = total;
-    totalEl.className   = `total-score-num ${totalCls}`;
-
-    // PREP 항목별 평가
-    const prepList = document.getElementById('prepList');
-    prepList.innerHTML = PREP_CRITERIA.map(c => {
+  function renderFeedbackItems(listId, group, scores) {
+    document.getElementById(listId).innerHTML = group.map(c => {
       const item     = scores[c.key] || {};
       const score    = item.score ?? 0;
       const scoreCls = score >= 8 ? 'high' : score >= 5 ? 'mid' : 'low';
@@ -1228,52 +1417,108 @@
         ${item.improve ? `<div class="prep-improve">💡 ${escHtml(item.improve)}</div>` : ''}
       </div>`;
     }).join('');
+  }
 
-    // 레이더 차트
-    updateRadarChart(PREP_CRITERIA.map(c => scores[c.key]?.score ?? 0));
+  function displayResults(result) {
+    const section = document.getElementById('resultsSection');
+    section.classList.add('show');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const scores = result.scores || {};
+    const total  = result.total ?? 0;
+
+    // 이중 레이더 차트
+    updatePrepChart(PREP_GROUP.map(c => scores[c.key]?.score ?? 0));
+    updateContentChart([...CONTENT_GROUP, ...DELIVERY_GROUP].map(c => scores[c.key]?.score ?? 0));
+
+    // 섹션별 피드백
+    renderFeedbackItems('prepFeedback',    PREP_GROUP,     scores);
+    renderFeedbackItems('contentFeedback', CONTENT_GROUP,  scores);
+    renderFeedbackItems('deliveryFeedback',DELIVERY_GROUP, scores);
+
+    // 종합 점수
+    const totalEl = document.getElementById('totalScoreNum');
+    totalEl.textContent = total;
+    totalEl.className   = `total-score-num ${total >= 75 ? 'high' : total >= 50 ? 'mid' : 'low'}`;
 
     // 총평 & 다음 목표
     document.getElementById('summaryText').textContent  = result.summary   || '';
     document.getElementById('nextGoalText').textContent = result.next_goal || '';
   }
 
-  function updateRadarChart(values) {
-    const ctx = document.getElementById('radarChart').getContext('2d');
-    if (radarChart) radarChart.destroy();
+  function makeRadarOptions() {
+    return {
+      responsive: true,
+      scales: {
+        r: {
+          min: 0, max: 10,
+          ticks: { stepSize: 2, font: { size: 9 } },
+          pointLabels: { font: { size: 11, weight: '700' }, color: '#1E293B' }
+        }
+      },
+      plugins: { legend: { display: false } }
+    };
+  }
 
-    radarChart = new Chart(ctx, {
+  function updatePrepChart(values) {
+    const ctx = document.getElementById('prepChart').getContext('2d');
+    if (radarChart1) radarChart1.destroy();
+    radarChart1 = new Chart(ctx, {
       type: 'radar',
       data: {
-        labels: PREP_CRITERIA.map(c => c.label),
+        labels: PREP_GROUP.map(c => c.label),
         datasets: [{
-          label: 'PREP 점수',
           data: values,
-          backgroundColor: 'rgba(37, 99, 235, 0.15)',
+          backgroundColor: 'rgba(124,58,237,0.15)',
+          borderColor: '#7C3AED',
+          borderWidth: 2,
+          pointBackgroundColor: '#7C3AED',
+          pointRadius: 4,
+        }]
+      },
+      options: makeRadarOptions()
+    });
+  }
+
+  function updateContentChart(values) {
+    const ctx = document.getElementById('contentChart').getContext('2d');
+    if (radarChart2) radarChart2.destroy();
+    radarChart2 = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: [...CONTENT_GROUP, ...DELIVERY_GROUP].map(c => c.label),
+        datasets: [{
+          data: values,
+          backgroundColor: 'rgba(37,99,235,0.15)',
           borderColor: '#2563EB',
           borderWidth: 2,
           pointBackgroundColor: '#2563EB',
           pointRadius: 4,
         }]
       },
-      options: {
-        responsive: true,
-        scales: {
-          r: {
-            min: 0,
-            max: 10,
-            ticks: { stepSize: 2, font: { size: 10 } },
-            pointLabels: { font: { size: 12, weight: '700' }, color: '#1E293B' }
-          }
-        },
-        plugins: { legend: { display: false } }
-      }
+      options: makeRadarOptions()
     });
   }
 
   function resetEval() {
     document.getElementById('resultsSection').classList.remove('show');
+    if (radarChart1) { radarChart1.destroy(); radarChart1 = null; }
+    if (radarChart2) { radarChart2.destroy(); radarChart2 = null; }
     clearTranscript();
     document.getElementById('recordCard').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ─────────────── 도움말 모달 ───────────────
+  function openHelpModal() {
+    document.getElementById('helpModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeHelpModal() {
+    document.getElementById('helpModal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function handleModalClick(e) {
+    if (e.target === document.getElementById('helpModal')) closeHelpModal();
   }
 
   // ─────────────── 유틸 ───────────────

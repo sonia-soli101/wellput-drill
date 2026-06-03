@@ -22,20 +22,30 @@ function buildQuery(base, params) {
 
 // 국내 뉴스: 단계적 폴백 (최소 1개 보장)
 async function getDomesticRaw(apiKey) {
-  // 1단계: language=ko, country=kr, q=AI
-  let url = buildQuery(LATEST, { apikey: apiKey, q: 'AI', language: 'ko', country: 'kr', size: 10 });
+  // 1단계: AI 핵심 키워드 + technology 카테고리
+  let url = buildQuery(LATEST, {
+    apikey: apiKey, language: 'ko', country: 'kr',
+    q: '인공지능 OR AI OR 챗GPT OR LLM OR 머신러닝',
+    category: 'technology', size: 10
+  });
   let results = await fetchNews(url);
   console.log('[국내뉴스] 1단계:', results.length, '건');
-  if (results.length >= 1) return results.slice(0, 5);
+  if (results.length >= 5) return results.slice(0, 5);
 
-  // 2단계: language=ko, q=AI, timeframe=7
-  url = buildQuery(LATEST, { apikey: apiKey, q: 'AI', language: 'ko', timeframe: 7, size: 10 });
+  // 2단계: country 제거 + timeframe 확장
+  url = buildQuery(LATEST, {
+    apikey: apiKey, language: 'ko',
+    q: '인공지능 OR AI', timeframe: 7, size: 10
+  });
   results = await fetchNews(url);
   console.log('[국내뉴스] 2단계:', results.length, '건');
-  if (results.length >= 1) return results.slice(0, 5);
+  if (results.length >= 5) return results.slice(0, 5);
 
-  // 3단계: language=ko, q=인공지능, timeframe=7
-  url = buildQuery(LATEST, { apikey: apiKey, q: '인공지능', language: 'ko', timeframe: 7, size: 10 });
+  // 3단계: 기술 일반 키워드로 확장
+  url = buildQuery(LATEST, {
+    apikey: apiKey, language: 'ko',
+    q: '테크 OR 기술 OR 스타트업', timeframe: 7, size: 10
+  });
   results = await fetchNews(url);
   console.log('[국내뉴스] 3단계:', results.length, '건');
   return results.slice(0, 5);
@@ -43,17 +53,21 @@ async function getDomesticRaw(apiKey) {
 
 // 국외 뉴스: 단계적 폴백
 async function getInternationalRaw(apiKey) {
-  // 1단계: language=en, country=us,gb
+  // 1단계: AI 핵심 키워드 + technology 카테고리
   let results = await fetchNews(buildQuery(LATEST, {
-    apikey: apiKey, q: 'artificial intelligence LLM',
-    language: 'en', country: 'us,gb', size: 10, prioritydomain: 'top'
+    apikey: apiKey, language: 'en', country: 'us,gb',
+    q: 'artificial intelligence OR AI OR LLM OR ChatGPT',
+    category: 'technology', size: 10, prioritydomain: 'top'
   }));
-  if (results.length >= 1) return results.slice(0, 5);
+  console.log('[국외뉴스] 1단계:', results.length, '건');
+  if (results.length >= 5) return results.slice(0, 5);
 
-  // 2단계: country 제거 (language=en 전체)
+  // 2단계: country 제거 + timeframe 확장
   results = await fetchNews(buildQuery(LATEST, {
-    apikey: apiKey, q: 'artificial intelligence LLM', language: 'en', size: 10
+    apikey: apiKey, language: 'en',
+    q: 'artificial intelligence OR machine learning', timeframe: 7, size: 10
   }));
+  console.log('[국외뉴스] 2단계:', results.length, '건');
   return results.slice(0, 5);
 }
 

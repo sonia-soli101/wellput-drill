@@ -18,16 +18,21 @@ module.exports = async function handler(req, res) {
 
   const evalInstruction = `주제: ${topic || '자유 주제'}
 
-다음 스피치를 PREP 프레임워크 기반으로 한국어로 평가해주세요.
+다음 스피치를 두 가지 관점(PREP 형식 + 내용·전달)으로 한국어 평가해주세요.
 
-PREP 평가 기준 (각 항목 0~10점):
-- point_intro   (P - 핵심 먼저):   처음에 핵심 주장/결론을 명확히 제시했는가?
-- reason        (R - 논리적 근거): 주장을 뒷받침하는 논리적 이유를 제시했는가?
-- example       (E - 구체적 예시): 근거를 뒷받침하는 사례·데이터·경험을 들었는가?
-- point_conclusion (P - 명확한 결론): 핵심 주장을 다시 강조하며 마무리했는가?
-- clarity       (전달 명확성):     전체적으로 표현이 명확하고 논리 흐름이 있는가?
+[PREP 형식 평가] 각 항목 0~10점:
+- point_intro      (P - 두괄식 구조): 핵심 주장을 먼저 제시했는가?
+- reason           (R - 근거 제시):   논리적 근거를 충분히 제시했는가?
+- example          (E - 예시 활용):   구체적 사례·데이터를 활용했는가?
+- point_conclusion (P - 결론 마무리): 핵심 주장으로 명확히 마무리했는가?
 
-total = 5개 점수 합산 × 2 (0~100점 환산)
+[내용 & 전달 평가] 각 항목 0~10점:
+- relevance (주제 연관성): 스피치 내용이 주제와 얼마나 관련 있는가?
+- logic     (논리적 타당성): 전체 논리 흐름이 타당하고 일관성 있는가?
+- depth     (내용의 깊이): 내용이 충분히 심층적이고 구체적인가?
+- clarity   (전달 명확성): 표현이 명확하고 청중이 이해하기 쉬운가?
+
+total = 8개 점수 합산을 100점 기준으로 환산 (합산 최대 80점 → 100점)
 
 반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
 {
@@ -36,9 +41,12 @@ total = 5개 점수 합산 × 2 (0~100점 환산)
     "reason":           { "score": 6, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
     "example":          { "score": 5, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
     "point_conclusion": { "score": 8, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
+    "relevance":        { "score": 7, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
+    "logic":            { "score": 6, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
+    "depth":            { "score": 5, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" },
     "clarity":          { "score": 7, "good": "잘한 점 한 문장", "improve": "개선할 점 한 문장" }
   },
-  "total": 66,
+  "total": 74,
   "summary": "전체 총평 2~3문장",
   "next_goal": "다음 스피치를 위한 구체적 목표 1문장"
 }`;
@@ -86,11 +94,11 @@ total = 5개 점수 합산 × 2 (0~100점 환산)
       result = match ? JSON.parse(match[0]) : { error: 'JSON 파싱 실패' };
     }
 
-    // total 검증 및 재계산
+    // total 재계산 (8개 × 최대 10점 = 80점 → 100점 환산)
     if (result.scores) {
-      const keys = ['point_intro', 'reason', 'example', 'point_conclusion', 'clarity'];
+      const keys = ['point_intro', 'reason', 'example', 'point_conclusion', 'relevance', 'logic', 'depth', 'clarity'];
       const sum = keys.reduce((acc, k) => acc + (result.scores[k]?.score || 0), 0);
-      result.total = Math.round(sum * 2);
+      result.total = Math.round((sum / 80) * 100);
     }
 
     res.status(200).json(result);
