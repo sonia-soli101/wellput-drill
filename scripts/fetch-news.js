@@ -46,11 +46,17 @@ async function fetchNews(url) {
   return data.status === 'success' ? (data.results || []) : [];
 }
 
+function getFromDate() {
+  const d = new Date();
+  d.setDate(d.getDate() - 2);
+  return d.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
 async function getDomesticRaw() {
   const params = new URLSearchParams({
     apikey: NEWSDATA_API_KEY, language: 'ko', country: 'kr',
     q: '인공지능 OR AI OR ChatGPT OR LLM OR 딥러닝',
-    category: 'technology', size: 10
+    category: 'technology', size: 10, from_date: getFromDate()
   });
   const raw = await fetchNews(`${NEWSDATA_BASE}?${params}`);
   const filtered = sortByRelevance(filterByKW(raw, DOMESTIC_KW), DOMESTIC_KW);
@@ -62,7 +68,7 @@ async function getInternationalRaw() {
   const params = new URLSearchParams({
     apikey: NEWSDATA_API_KEY, language: 'en', country: 'us,gb',
     q: 'artificial intelligence OR AI OR ChatGPT OR LLM',
-    category: 'technology', size: 10, prioritydomain: 'top'
+    category: 'technology', size: 10, prioritydomain: 'top', from_date: getFromDate()
   });
   const raw = await fetchNews(`${NEWSDATA_BASE}?${params}`);
   const filtered = sortByRelevance(filterByKW(raw, INTL_KW), INTL_KW);
