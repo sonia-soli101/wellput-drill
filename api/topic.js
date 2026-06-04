@@ -1,3 +1,15 @@
+function cleanJSON(text) {
+  return text.replace(/```json/g, '').replace(/```/g, '').trim();
+}
+
+function geminiError(status) {
+  if (status === 429) return {
+    error: 'AI 분석 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해주세요. (보통 1분 이내 해결됩니다)',
+    isRateLimit: true
+  };
+  return { error: '일시적인 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.' };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -49,14 +61,11 @@ ${articleList}
         }
       );
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error?.message || `Gemini API 오류: ${response.status}`);
-      }
+      if (!response.ok) return res.status(200).json(geminiError(response.status));
 
-      const data = await response.json();
+      const data    = await response.json();
       const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-      const result = JSON.parse(rawText);
+      const result  = JSON.parse(cleanJSON(rawText));
 
       const ensureQ = (s) => { const t = (s || '').trim(); return t && !t.endsWith('?') ? t + '?' : t; };
 
@@ -101,16 +110,13 @@ ${articleList}
       }
     );
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || `Gemini API 오류: ${response.status}`);
-    }
+    if (!response.ok) return res.status(200).json(geminiError(response.status));
 
     const data = await response.json();
     let topic = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
     if (topic && !topic.endsWith('?')) topic += '?';
     res.status(200).json({ topic });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: '일시적인 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.' });
   }
 };

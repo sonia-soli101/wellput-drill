@@ -1,3 +1,11 @@
+function geminiError(status) {
+  if (status === 429) return {
+    error: 'AI 분석 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해주세요. (보통 1분 이내 해결됩니다)',
+    isRateLimit: true
+  };
+  return { error: '일시적인 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.' };
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -18,7 +26,6 @@ module.exports = async function handler(req, res) {
     let parts = [];
 
     if (type === 'url' && url) {
-      // Jina Reader API: URL을 깨끗한 텍스트로 변환 (무료)
       const readerRes = await fetch(`https://r.jina.ai/${url}`, {
         headers: { Accept: 'text/plain' }
       });
@@ -51,15 +58,12 @@ module.exports = async function handler(req, res) {
       }
     );
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || `Gemini API 오류: ${response.status}`);
-    }
+    if (!response.ok) return res.status(200).json(geminiError(response.status));
 
     const data = await response.json();
     const summary = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
     res.status(200).json({ summary });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: '일시적인 오류가 발생했습니다. 페이지를 새로고침 후 다시 시도해주세요.' });
   }
 };

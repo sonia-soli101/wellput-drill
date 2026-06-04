@@ -211,6 +211,18 @@
       resize: vertical;
     }
     input[type="url"]:focus, textarea:focus { border-color: var(--teal); }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+    }
+    input[type="text"]:focus { border-color: var(--purple); }
 
     .file-drop {
       border: 2px dashed var(--border);
@@ -482,6 +494,21 @@
     .chart-card { background: var(--bg); border-radius: 10px; padding: 12px 8px; }
     .chart-card-title { font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 6px; }
 
+    /* ── 시간 선택 ── */
+    .time-btn {
+      padding: 8px 20px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: white;
+      color: var(--muted);
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .time-btn.active { background: var(--purple); color: white; border-color: var(--purple); }
+
     /* ── 로딩 ── */
     .spinner {
       display: inline-block;
@@ -509,6 +536,26 @@
       margin-top: 10px;
     }
     .error-box.show { display: block; }
+    .error-box.warn {
+      background: #FFFBEB;
+      border-color: #FDE68A;
+      color: #92400E;
+    }
+    .topic-warn {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      color: #92400E;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .topic-err-msg {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      text-align: center;
+    }
 
     /* ── 헤더 도움말 버튼 ── */
     .help-btn {
@@ -740,6 +787,20 @@
     </div>
     <div class="term-grid" id="termGrid"></div>
     <div class="error-box" id="termError"></div>
+
+    <!-- 직접 입력 -->
+    <div id="customTermArea" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">💬 직접 입력</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="customTermInput"
+          placeholder="AI 관련 용어를 직접 입력하세요 (예: LoRA, PEFT, KV Cache...)"
+          onkeydown="if(event.key==='Enter') checkAndAddTerm()" />
+        <button class="btn btn-purple" onclick="checkAndAddTerm()" id="checkTermBtn">✅ 확인 &amp; 추가</button>
+      </div>
+      <p class="loading-text" id="termCheckLoading">AI 용어 여부 확인 중...</p>
+      <div class="error-box" id="termCheckError"></div>
+    </div>
+
     <div class="topic-gen-wrap" id="termTopicBtnWrap" style="display:none">
       <button class="btn btn-purple topic-gen-btn" id="termTopicBtn" onclick="generateTermTopic()">✨ 오늘의 스피치 주제 생성</button>
     </div>
@@ -804,8 +865,13 @@
     <div class="card-title">🎙️ 스피치 녹음</div>
 
     <div class="record-area">
+      <div id="timeSelector" style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
+        <button class="time-btn active" onclick="selectTime(1)">1분</button>
+        <button class="time-btn" onclick="selectTime(3)">3분</button>
+        <button class="time-btn" onclick="selectTime(5)">5분</button>
+      </div>
       <button id="recordBtn" onclick="toggleRecording()">🎤</button>
-      <div id="timer">0:00</div>
+      <div id="timer">1:00</div>
       <div id="recordStatus">버튼을 눌러 녹음을 시작하세요</div>
     </div>
 
@@ -908,7 +974,10 @@
   let audioChunks = [];
   let audioBlob = null;
   let timerInterval = null;
-  let recordingSeconds = 0;
+  let recordingSeconds = 0;   // 미사용 (하위 호환 유지)
+  let selectedMinutes = 1;
+  let totalSeconds    = 60;
+  let remainingSeconds = 60;
 
   let radarChart1 = null;
   let radarChart2 = null;
@@ -950,6 +1019,38 @@
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(`mode-${mode}`).classList.add('active');
     event.currentTarget.classList.add('active');
+
+    // 1. 진행 중인 녹음 중지
+    if (isRecording) stopRecording();
+
+    // 2. 타이머 초기화
+    clearInterval(timerInterval);
+    remainingSeconds = totalSeconds;
+    document.getElementById('timer').textContent = `${selectedMinutes}:00`;
+    document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
+    document.getElementById('recordBtn').classList.remove('recording');
+    document.getElementById('recordBtn').innerHTML = '🎤';
+
+    // 3. STT 텍스트 초기화
+    finalTranscript = '';
+    document.getElementById('finalSpan').textContent = '';
+    document.getElementById('interimSpan').textContent = '';
+
+    // 4. 평가 버튼 비활성화
+    document.getElementById('evalBtn').disabled = true;
+
+    // 5. 주제 카드 숨기기
+    document.getElementById('topicCard').classList.remove('show');
+    document.getElementById('topicText').innerHTML = '';
+    document.getElementById('selectedArticleBox').style.display = 'none';
+
+    // 6. 평가 결과 숨기기
+    document.getElementById('resultsSection').classList.remove('show');
+
+    // 7. 에러박스 초기화
+    ['newsError', 'termError', 'termCheckError', 'customError', 'evalError'].forEach(id => {
+      document.getElementById(id).classList.remove('show');
+    });
   }
 
   // ─────────────── 뉴스 모드 ───────────────
@@ -1096,13 +1197,78 @@
     document.getElementById(`chip-${t.term.replace(/\s+/g,'_')}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  function selectTerm(term) {
-    document.querySelectorAll('.term-chip').forEach(el => el.classList.remove('selected'));
-    const chipId = `chip-${term.replace(/\s+/g, '_')}`;
-    document.getElementById(chipId)?.classList.add('selected');
+  function selectTerm(term, el) {
+    document.querySelectorAll('.term-chip').forEach(e => e.classList.remove('selected'));
+    if (el) {
+      el.classList.add('selected');
+    } else {
+      document.getElementById(`chip-${term.replace(/\s+/g, '_')}`)?.classList.add('selected');
+    }
     selectedTerm = term;
     document.getElementById('termTopicBtnWrap').style.display = '';
     document.getElementById('termError').classList.remove('show');
+  }
+
+  // ─────────────── 직접 입력 용어 ───────────────
+  async function checkAndAddTerm() {
+    const input   = document.getElementById('customTermInput');
+    const term    = input.value.trim();
+    if (!term) return;
+
+    const loadingEl = document.getElementById('termCheckLoading');
+    const errorEl   = document.getElementById('termCheckError');
+    const btn       = document.getElementById('checkTermBtn');
+
+    btn.disabled = true;
+    loadingEl.classList.add('show');
+    errorEl.classList.remove('show');
+
+    try {
+      const res  = await fetch('/api/check-term', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ term })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorEl.textContent = data.error || '일시적인 오류가 발생했습니다. 다시 시도해주세요.';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      if (!data.isAiTerm) {
+        errorEl.textContent = `"${term}"은(는) AI 관련 용어가 아닙니다. AI/ML 관련 용어를 입력해주세요.`;
+        errorEl.classList.add('show');
+        return;
+      }
+
+      addCustomTermChip(term, data.desc || term);
+      input.value = '';
+      errorEl.classList.remove('show');
+    } catch (e) {
+      errorEl.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+      errorEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      loadingEl.classList.remove('show');
+    }
+  }
+
+  function addCustomTermChip(term, desc) {
+    const existing = document.querySelector(`.term-chip[data-term="${CSS.escape(term)}"]`);
+    if (existing) { selectTerm(term, existing); return; }
+
+    const chip = document.createElement('div');
+    chip.className = 'term-chip';
+    chip.dataset.term = term;
+    chip.title = desc;
+    chip.innerHTML = `<strong>${escHtml(term)}</strong><br/><span style="font-size:11px;opacity:.7">✏️ ${escHtml(desc)}</span>`;
+    chip.onclick = () => selectTerm(term, chip);
+
+    document.getElementById('termGrid').appendChild(chip);
+    selectTerm(term, chip);
+    chip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   async function generateTermTopic() {
@@ -1199,7 +1365,11 @@
         body: JSON.stringify(body)
       });
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error);
+      if (!res.ok || data.error) {
+        const err = new Error(data.error || '오류가 발생했습니다.');
+        err.isRateLimit = !!data.isRateLimit;
+        throw err;
+      }
 
       currentTopic = data.topic;
 
@@ -1225,7 +1395,10 @@
 
       document.getElementById('recordCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {
-      topicTextEl.innerHTML = `<div style="color:var(--red)">❌ 주제 생성에 실패했습니다: ${escHtml(e.message)}</div>`;
+      const isRateLimit = (e.message || '').includes('혼잡') || e.isRateLimit;
+      topicTextEl.innerHTML = isRateLimit
+        ? `<div class="topic-warn">⚠️ ${escHtml(e.message)}</div>`
+        : `<div class="topic-err-msg">오늘의 주제를 불러오는 데 실패했습니다.<br>잠시 후 '주제 생성' 버튼을 다시 눌러주세요.</div>`;
     }
   }
 
@@ -1252,21 +1425,39 @@
       }
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = interim;
-      if (finalTranscript.trim()) {
-        document.getElementById('evalBtn').disabled = false;
-      }
+      document.getElementById('evalBtn').disabled = !finalTranscript.trim();
     };
 
     recognition.onerror = (e) => {
       console.error('STT 오류:', e.error);
-      if (e.error !== 'no-speech') {
-        document.getElementById('recordStatus').textContent = '음성 인식 오류: ' + e.error;
+      const statusEl = document.getElementById('recordStatus');
+      if (e.error === 'not-allowed') {
+        statusEl.textContent = '⚠️ 마이크 권한이 차단되어 있습니다. 주소창 자물쇠 아이콘에서 마이크를 허용해주세요.';
+        isRecording = false;
+        document.getElementById('recordBtn').classList.remove('recording');
+        document.getElementById('recordBtn').innerHTML = '🎤';
+      } else if (e.error === 'no-speech') {
+        statusEl.textContent = '음성이 감지되지 않았습니다. 말씀해주세요.';
+      } else {
+        statusEl.textContent = '⚠️ 음성인식 오류가 발생했습니다. 다시 시도해주세요.';
       }
     };
 
     recognition.onend = () => {
-      if (isRecording) recognition.start(); // 자동 재시작 (continuous 보완)
+      if (isRecording) {
+        try { recognition.start(); } catch (err) { console.warn('recognition.start 실패:', err.message); }
+      }
     };
+  }
+
+  // ─────────────── 시간 선택 ───────────────
+  function selectTime(minutes) {
+    selectedMinutes  = minutes;
+    totalSeconds     = minutes * 60;
+    remainingSeconds = minutes * 60;
+    document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    document.getElementById('timer').textContent = `${minutes}:00`;
   }
 
   // ─────────────── 녹음 토글 ───────────────
@@ -1304,16 +1495,17 @@
     if (recognition) recognition.start();
 
     isRecording = true;
-    recordingSeconds = 0;
+    remainingSeconds = totalSeconds;
     document.getElementById('recordBtn').classList.add('recording');
     document.getElementById('recordBtn').innerHTML = '⏹';
     document.getElementById('recordStatus').textContent = '녹음 중... (다시 누르면 중지)';
 
     timerInterval = setInterval(() => {
-      recordingSeconds++;
-      const m = Math.floor(recordingSeconds / 60);
-      const s = String(recordingSeconds % 60).padStart(2, '0');
+      remainingSeconds--;
+      const m = Math.floor(remainingSeconds / 60);
+      const s = String(remainingSeconds % 60).padStart(2, '0');
       document.getElementById('timer').textContent = `${m}:${s}`;
+      if (remainingSeconds <= 0) stopRecording();
     }, 1000);
   }
 
@@ -1337,9 +1529,9 @@
     document.getElementById('finalSpan').textContent = '';
     document.getElementById('interimSpan').textContent = '';
     document.getElementById('evalBtn').disabled = true;
-    document.getElementById('timer').textContent = '0:00';
+    remainingSeconds = totalSeconds;
+    document.getElementById('timer').textContent = `${selectedMinutes}:00`;
     document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
-    recordingSeconds = 0;
   }
 
   // ─────────────── 스피치 평가 ───────────────
@@ -1524,7 +1716,10 @@
   // ─────────────── 유틸 ───────────────
   function showError(id, msg) {
     const el = document.getElementById(id);
-    el.textContent = '❌ ' + msg;
+    const isRateLimit = (msg || '').includes('혼잡');
+    el.textContent = (isRateLimit ? '⚠️ ' : '❌ ') + msg;
+    el.classList.remove('warn');
+    if (isRateLimit) el.classList.add('warn');
     el.classList.add('show');
   }
 
