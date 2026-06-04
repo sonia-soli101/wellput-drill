@@ -28,8 +28,11 @@ module.exports = async function handler(req, res) {
 
 판단 기준:
 - AI/ML/딥러닝/NLP/컴퓨터비전/강화학습 관련이면 true
-- 일반 IT 용어라도 AI와 밀접하면 true
-- AI와 무관한 일반 단어/개념이면 false`;
+- 클라우드/DevOps/인프라/네트워크/보안 관련이면 true
+- 프로그래밍 언어/프레임워크/데이터베이스 관련이면 true
+- 반도체/하드웨어/IoT/블록체인/핀테크 관련이면 true
+- 일반 IT 용어라도 기술 분야와 밀접하면 true
+- 기술과 무관한 일반 단어/개념이면 false`;
 
   try {
     const response = await fetch(

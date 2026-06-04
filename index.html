@@ -790,10 +790,10 @@
 
     <!-- 직접 입력 -->
     <div id="customTermArea" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">💬 직접 입력</div>
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">💬 AI/Tech 용어 직접 입력</div>
       <div style="display:flex;gap:8px">
         <input type="text" id="customTermInput"
-          placeholder="AI 관련 용어를 직접 입력하세요 (예: LoRA, PEFT, KV Cache...)"
+          placeholder="AI/Tech 관련 용어를 입력하세요 (예: LoRA, Kubernetes, GraphQL...)"
           onkeydown="if(event.key==='Enter') checkAndAddTerm()" />
         <button class="btn btn-purple" onclick="checkAndAddTerm()" id="checkTermBtn">✅ 확인 &amp; 추가</button>
       </div>
@@ -1238,7 +1238,7 @@
       }
 
       if (!data.isAiTerm) {
-        errorEl.textContent = `"${term}"은(는) AI 관련 용어가 아닙니다. AI/ML 관련 용어를 입력해주세요.`;
+        errorEl.textContent = `"${term}"은(는) AI/Tech 관련 용어가 아닙니다. 기술 분야 용어를 입력해주세요.`;
         errorEl.classList.add('show');
         return;
       }
