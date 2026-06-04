@@ -48,17 +48,29 @@ async function fetchNews(url) {
 
 function getFromDate() {
   const d = new Date();
-  d.setDate(d.getDate() - 2);
+  d.setDate(d.getDate() - 7);
   return d.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
+// from_date 필터 적용 후 결과 없으면 날짜 필터 없이 재시도
+async function fetchNewsWithFallback(baseUrl) {
+  const fromDate = getFromDate();
+  const urlWithDate = `${baseUrl}&from_date=${fromDate}`;
+  let raw = await fetchNews(urlWithDate);
+  if (raw.length === 0) {
+    console.log('  (날짜 필터 결과 없음 → 필터 없이 재시도)');
+    raw = await fetchNews(baseUrl);
+  }
+  return raw;
 }
 
 async function getDomesticRaw() {
   const params = new URLSearchParams({
     apikey: NEWSDATA_API_KEY, language: 'ko', country: 'kr',
     q: '인공지능 OR AI OR ChatGPT OR LLM OR 딥러닝',
-    category: 'technology', size: 10, from_date: getFromDate()
+    category: 'technology', size: 10
   });
-  const raw = await fetchNews(`${NEWSDATA_BASE}?${params}`);
+  const raw = await fetchNewsWithFallback(`${NEWSDATA_BASE}?${params}`);
   const filtered = sortByRelevance(filterByKW(raw, DOMESTIC_KW), DOMESTIC_KW);
   console.log(`  수집 ${raw.length}건 → AI 필터 후 ${filtered.length}건`);
   return filtered.slice(0, 3);
@@ -68,9 +80,9 @@ async function getInternationalRaw() {
   const params = new URLSearchParams({
     apikey: NEWSDATA_API_KEY, language: 'en', country: 'us,gb',
     q: 'artificial intelligence OR AI OR ChatGPT OR LLM',
-    category: 'technology', size: 10, prioritydomain: 'top', from_date: getFromDate()
+    category: 'technology', size: 10, prioritydomain: 'top'
   });
-  const raw = await fetchNews(`${NEWSDATA_BASE}?${params}`);
+  const raw = await fetchNewsWithFallback(`${NEWSDATA_BASE}?${params}`);
   const filtered = sortByRelevance(filterByKW(raw, INTL_KW), INTL_KW);
   console.log(`  수집 ${raw.length}건 → AI 필터 후 ${filtered.length}건`);
   return filtered.slice(0, 3);
