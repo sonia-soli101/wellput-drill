@@ -1601,6 +1601,58 @@
     document.getElementById('evalBtn').disabled = true;
     document.getElementById('resultsSection').classList.remove('show');
 
+    // recognition 매번 새로 생성 (재사용 시 onresult 미발동 방지)
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      document.getElementById('recordStatus').textContent =
+        '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다.';
+      return;
+    }
+    recognition = new SR();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += t;
+        } else {
+          interim += t;
+        }
+      }
+      document.getElementById('finalSpan').textContent = finalTranscript;
+      document.getElementById('interimSpan').textContent = interim;
+      document.getElementById('evalBtn').disabled = !finalTranscript.trim();
+    };
+
+    recognition.onerror = (e) => {
+      console.error('STT 오류:', e.error);
+      if (e.error === 'not-allowed') {
+        document.getElementById('recordStatus').textContent =
+          '⚠️ 마이크 권한이 차단되어 있습니다. 주소창 자물쇠 아이콘에서 허용해주세요.';
+        stopRecording();
+      } else if (e.error === 'no-speech') {
+        // no-speech는 무시 (continuous 모드에서 자주 발생)
+      } else {
+        document.getElementById('recordStatus').textContent =
+          '⚠️ 음성인식 오류: ' + e.error;
+      }
+    };
+
+    recognition.onend = () => {
+      document.getElementById('finalSpan').textContent = finalTranscript;
+      document.getElementById('interimSpan').textContent = '';
+      if (isRecording) {
+        try { recognition.start(); } catch (e) {}
+      } else {
+        const evalBtn = document.getElementById('evalBtn');
+        if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
+      }
+    };
+
     // MediaRecorder (음성 파일 저장용)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1616,9 +1668,7 @@
       console.warn('MediaRecorder 실패 (STT 전용으로 계속):', e.message);
     }
 
-    // 음성 인식 시작
-    if (recognition) recognition.start();
-
+    recognition.start();
     isRecording = true;
     remainingSeconds = totalSeconds;
     document.getElementById('recordBtn').classList.add('recording');
