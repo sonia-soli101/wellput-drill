@@ -1284,11 +1284,7 @@
       const list = document.getElementById('savedTermsList');
       if (!list.querySelector(`[data-saved-term=${JSON.stringify(term)}]`)) {
         area.style.display = 'block';
-        const savedChip = document.createElement('div');
-        savedChip.className = 'saved-term-chip';
-        savedChip.dataset.savedTerm = term;
-        savedChip.innerHTML = `<span onclick="selectTermByName(${JSON.stringify(term)})">${escHtml(term)}</span><span class="delete-btn" onclick="deleteCustomTerm(${JSON.stringify(term)}, this)" title="삭제">✕</span>`;
-        list.appendChild(savedChip);
+        list.appendChild(createSavedTermChip(term, data.desc || term));
       }
     } catch (e) {
       errorEl.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
@@ -1321,6 +1317,30 @@
     selectTerm(term, chip || null);
   }
 
+  function createSavedTermChip(term, desc) {
+    const chip = document.createElement('div');
+    chip.className = 'saved-term-chip';
+    chip.dataset.savedTerm = term;
+
+    const termSpan = document.createElement('span');
+    termSpan.textContent = term;
+    termSpan.style.cursor = 'pointer';
+    termSpan.onclick = () => selectTermByName(term);
+
+    const deleteBtn = document.createElement('span');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = '✕';
+    deleteBtn.title = '삭제';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      deleteCustomTerm(term, chip);
+    };
+
+    chip.appendChild(termSpan);
+    chip.appendChild(deleteBtn);
+    return chip;
+  }
+
   async function loadCustomTerms() {
     try {
       const res  = await fetch('/api/custom-terms');
@@ -1334,18 +1354,14 @@
 
       data.terms.forEach(({ term, desc }) => {
         addCustomTermChip(term, desc || term);
-        const chip = document.createElement('div');
-        chip.className = 'saved-term-chip';
-        chip.dataset.savedTerm = term;
-        chip.innerHTML = `<span onclick="selectTermByName(${JSON.stringify(term)})">${escHtml(term)}</span><span class="delete-btn" onclick="deleteCustomTerm(${JSON.stringify(term)}, this)" title="삭제">✕</span>`;
-        list.appendChild(chip);
+        list.appendChild(createSavedTermChip(term, desc || term));
       });
     } catch (e) {
       console.error('저장된 용어 불러오기 실패:', e);
     }
   }
 
-  async function deleteCustomTerm(term, btnEl) {
+  async function deleteCustomTerm(term, chipEl) {
     if (!confirm(`"${term}" 용어를 삭제할까요?`)) return;
     try {
       const res = await fetch('/api/custom-terms', {
@@ -1355,7 +1371,7 @@
       });
       if (!res.ok) throw new Error();
 
-      btnEl.closest('.saved-term-chip').remove();
+      chipEl.remove();
       const gridChip = document.querySelector(`.term-chip[data-term="${CSS.escape(term)}"]`);
       if (gridChip) gridChip.remove();
       const list = document.getElementById('savedTermsList');
@@ -1512,15 +1528,17 @@
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    recognition.onresult = (e) => {
+    recognition.onresult = (event) => {
       let interim = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) {
-          finalTranscript += e.results[i][0].transcript;
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += t;
         } else {
-          interim += e.results[i][0].transcript;
+          interim += t;
         }
       }
+      // 반드시 DOM 즉시 반영
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = interim;
       document.getElementById('evalBtn').disabled = !finalTranscript.trim();
@@ -1542,11 +1560,18 @@
     };
 
     recognition.onend = () => {
-      // 최종 transcript를 DOM에 반영 (마지막 결과 유실 방지)
+      // 종료 시점에 finalTranscript DOM 강제 반영
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = '';
-      if (!isRecording) return;  // 정상 종료면 재시작 안 함
-      try { recognition.start(); } catch (err) { stopRecording(); }
+
+      if (isRecording) {
+        // 아직 녹음 중이면 재시작 (끊김 방지)
+        try { recognition.start(); } catch (e) { stopRecording(); }
+      } else {
+        // 정상 종료 시 evalBtn 활성화
+        const evalBtn = document.getElementById('evalBtn');
+        if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
+      }
     };
   }
 
@@ -1610,27 +1635,28 @@
   }
 
   function stopRecording() {
-    if (recognition) {
-      try { recognition.stop(); } catch {}
-      // onresult 마지막 결과 처리 대기 후 DOM 반영
-      setTimeout(() => {
-        document.getElementById('finalSpan').textContent = finalTranscript;
-        document.getElementById('interimSpan').textContent = '';
-        const evalBtn = document.getElementById('evalBtn');
-        if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
-      }, 300);
-    }
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    // isRecording을 먼저 false로 설정 (onend에서 재시작 방지)
+    isRecording = false;
     clearInterval(timerInterval);
 
-    isRecording = false;
+    if (recognition) {
+      try { recognition.stop(); } catch {}
+    }
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+
+    // 300ms 후 강제 반영 (onend보다 늦게 실행되는 경우 대비)
+    setTimeout(() => {
+      document.getElementById('finalSpan').textContent = finalTranscript;
+      document.getElementById('interimSpan').textContent = '';
+      const evalBtn = document.getElementById('evalBtn');
+      if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
+    }, 300);
+
     document.getElementById('recordBtn').classList.remove('recording');
     document.getElementById('recordBtn').innerHTML = '🎤';
-    document.getElementById('recordStatus').textContent = '녹음 완료. 아래에서 평가를 시작하세요.';
-
-    if (finalTranscript.trim()) {
-      document.getElementById('evalBtn').disabled = false;
-    }
+    document.getElementById('recordStatus').textContent = finalTranscript.trim()
+      ? '녹음 완료. 아래에서 평가를 시작하세요.'
+      : '녹음 완료. 음성이 인식되지 않았습니다.';
   }
 
   function clearTranscript() {
