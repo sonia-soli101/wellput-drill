@@ -1595,10 +1595,14 @@
   }
 
   async function startRecording() {
+    console.log('[STT] startRecording 시작');
+
     // 이전 recognition 완전 종료 대기
     if (recognition) {
-      try { recognition.stop(); } catch {}
+      console.log('[STT] 이전 recognition 종료 중...');
+      try { recognition.stop(); } catch (e) { console.log('[STT] stop 오류:', e); }
       await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('[STT] 500ms 대기 완료');
     }
 
     finalTranscript = '';
@@ -1609,6 +1613,7 @@
 
     // recognition 새로 생성
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    console.log('[STT] SR 지원 여부:', !!SR);
     if (!SR) {
       document.getElementById('recordStatus').textContent =
         '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다.';
@@ -1618,8 +1623,12 @@
     recognition.lang = 'ko-KR';
     recognition.continuous = true;
     recognition.interimResults = true;
+    console.log('[STT] recognition 생성 완료');
+
+    recognition.onstart = () => console.log('[STT] onstart 발동 - 인식 시작됨');
 
     recognition.onresult = (event) => {
+      console.log('[STT] onresult 발동:', event.results[event.resultIndex][0].transcript);
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript;
@@ -1635,18 +1644,20 @@
     };
 
     recognition.onerror = (e) => {
-      if (e.error === 'aborted') return;  // 이전 인스턴스 종료 중 발생, 무시
-      if (e.error === 'no-speech') return; // continuous 모드에서 자주 발생, 무시
+      console.log('[STT] onerror:', e.error);
+      if (e.error === 'aborted') return;
+      if (e.error === 'no-speech') return;
       if (e.error === 'not-allowed') {
         document.getElementById('recordStatus').textContent =
           '⚠️ 마이크 권한이 차단되어 있습니다. 주소창 자물쇠 아이콘에서 허용해주세요.';
         stopRecording();
       } else {
-        console.error('STT 오류:', e.error);
+        console.error('[STT] 처리되지 않은 오류:', e.error);
       }
     };
 
     recognition.onend = () => {
+      console.log('[STT] onend 발동, isRecording:', isRecording);
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = '';
       if (isRecording) {
@@ -1660,6 +1671,7 @@
     // MediaRecorder (음성 파일 저장용)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('[STT] 마이크 스트림 획득 성공');
       audioChunks = [];
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
@@ -1669,13 +1681,14 @@
       };
       mediaRecorder.start(1000);
     } catch (e) {
-      console.warn('MediaRecorder 실패 (STT 전용으로 계속):', e.message);
+      console.warn('[STT] MediaRecorder 실패:', e.message);
     }
 
     try {
       recognition.start();
+      console.log('[STT] recognition.start() 호출 완료');
     } catch (e) {
-      console.error('recognition.start() 실패:', e);
+      console.error('[STT] recognition.start() 실패:', e);
       return;
     }
 
