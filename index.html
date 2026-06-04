@@ -536,6 +536,8 @@
     }
     .saved-term-chip .delete-btn:hover { color: var(--red); }
 
+    #waveCanvas { display: block; background: transparent; }
+
     /* ── 로딩 ── */
     .spinner {
       display: inline-block;
@@ -902,6 +904,8 @@
         <button class="time-btn" onclick="selectTime(5)">5분</button>
       </div>
       <button id="recordBtn" onclick="toggleRecording()">🎤</button>
+      <canvas id="waveCanvas" width="300" height="60"
+        style="display:none; margin:8px auto; border-radius:8px;"></canvas>
       <div id="timer">1:00</div>
       <div id="recordStatus">버튼을 눌러 녹음을 시작하세요</div>
     </div>
@@ -1013,6 +1017,11 @@
   let radarChart1 = null;
   let radarChart2 = null;
 
+  let audioContext  = null;
+  let analyser      = null;
+  let waveAnimFrame = null;
+  let micStream     = null;
+
   // ─────────────── AI 용어 목록 ───────────────
   const AI_TERMS = [
     { term: 'LLM', desc: 'Large Language Model' },
@@ -1054,6 +1063,11 @@
 
     // 1. 진행 중인 녹음 중지
     if (isRecording) stopRecording();
+
+    // 파형 정리 (녹음 중이 아닐 때도 혹시 남아있으면 제거)
+    if (waveAnimFrame) { cancelAnimationFrame(waveAnimFrame); waveAnimFrame = null; }
+    document.getElementById('waveCanvas').style.display = 'none';
+    if (audioContext) { audioContext.close(); audioContext = null; analyser = null; }
 
     // 2. 타이머 초기화
     clearInterval(timerInterval);
@@ -1622,6 +1636,19 @@
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('[STT] 마이크 스트림 획득 성공');
+      micStream = stream;
+
+      // Web Audio API 파형 분석
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      audioContext.createMediaStreamSource(stream).connect(analyser);
+
+      // 파형 캔버스 표시
+      const waveCanvas = document.getElementById('waveCanvas');
+      waveCanvas.style.display = 'block';
+      drawWaveform();
+
       audioChunks = [];
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
@@ -1657,14 +1684,49 @@
     }, 1000);
   }
 
+  function drawWaveform() {
+    const canvas = document.getElementById('waveCanvas');
+    const ctx    = canvas.getContext('2d');
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray    = new Uint8Array(bufferLength);
+
+    function draw() {
+      waveAnimFrame = requestAnimationFrame(draw);
+      analyser.getByteTimeDomainData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(124,58,237,0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.lineWidth   = 2;
+      ctx.strokeStyle = '#7C3AED';
+      ctx.beginPath();
+
+      const sliceWidth = canvas.width / bufferLength;
+      let x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const y = (dataArray[i] / 128.0) * canvas.height / 2;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        x += sliceWidth;
+      }
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+    }
+    draw();
+  }
+
   function stopRecording() {
-    // isRecording을 먼저 false로 설정 (onend에서 재시작 방지)
     isRecording = false;
     clearInterval(timerInterval);
 
-    if (recognition) {
-      try { recognition.stop(); } catch {}
-    }
+    // 파형 중지 및 정리
+    if (waveAnimFrame) { cancelAnimationFrame(waveAnimFrame); waveAnimFrame = null; }
+    const waveCanvas = document.getElementById('waveCanvas');
+    waveCanvas.style.display = 'none';
+    waveCanvas.getContext('2d').clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+    if (audioContext) { audioContext.close(); audioContext = null; analyser = null; }
+
+    if (recognition) { try { recognition.stop(); } catch {} }
     if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
 
     // 300ms 후 강제 반영 (onend보다 늦게 실행되는 경우 대비)
