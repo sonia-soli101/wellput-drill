@@ -1595,13 +1595,19 @@
   }
 
   async function startRecording() {
+    // 이전 recognition 완전 종료 대기
+    if (recognition) {
+      try { recognition.stop(); } catch {}
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
     finalTranscript = '';
     document.getElementById('finalSpan').textContent = '';
     document.getElementById('interimSpan').textContent = '';
     document.getElementById('evalBtn').disabled = true;
     document.getElementById('resultsSection').classList.remove('show');
 
-    // recognition 매번 새로 생성 (재사용 시 onresult 미발동 방지)
+    // recognition 새로 생성
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       document.getElementById('recordStatus').textContent =
@@ -1629,16 +1635,14 @@
     };
 
     recognition.onerror = (e) => {
-      console.error('STT 오류:', e.error);
+      if (e.error === 'aborted') return;  // 이전 인스턴스 종료 중 발생, 무시
+      if (e.error === 'no-speech') return; // continuous 모드에서 자주 발생, 무시
       if (e.error === 'not-allowed') {
         document.getElementById('recordStatus').textContent =
           '⚠️ 마이크 권한이 차단되어 있습니다. 주소창 자물쇠 아이콘에서 허용해주세요.';
         stopRecording();
-      } else if (e.error === 'no-speech') {
-        // no-speech는 무시 (continuous 모드에서 자주 발생)
       } else {
-        document.getElementById('recordStatus').textContent =
-          '⚠️ 음성인식 오류: ' + e.error;
+        console.error('STT 오류:', e.error);
       }
     };
 
@@ -1668,7 +1672,13 @@
       console.warn('MediaRecorder 실패 (STT 전용으로 계속):', e.message);
     }
 
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error('recognition.start() 실패:', e);
+      return;
+    }
+
     isRecording = true;
     remainingSeconds = totalSeconds;
     document.getElementById('recordBtn').classList.add('recording');
