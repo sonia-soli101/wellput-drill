@@ -31,7 +31,6 @@
       min-height: 100vh;
     }
 
-    /* ── 헤더 ── */
     header {
       background: linear-gradient(135deg, #1E3A8A 0%, #4C1D95 100%);
       color: white;
@@ -45,7 +44,6 @@
     header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
     header p  { font-size: 12px; opacity: .75; margin-top: 2px; }
 
-    /* ── 레이아웃 ── */
     main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
 
     .card {
@@ -69,7 +67,6 @@
       gap: 6px;
     }
 
-    /* ── 모드 탭 ── */
     .mode-tabs {
       display: flex;
       gap: 8px;
@@ -99,11 +96,9 @@
     }
     .tab-btn:hover:not(.active) { background: var(--bg); color: var(--text); }
 
-    /* ── 모드 콘텐츠 ── */
     .mode-content { display: none; }
     .mode-content.active { display: block; }
 
-    /* ── 버튼 ── */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -135,7 +130,6 @@
     .btn-success:hover { background: #047857; }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
 
-    /* ── 뉴스 카드 ── */
     .news-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
     .news-item {
       padding: 12px 14px;
@@ -159,13 +153,7 @@
     .analysis-tag.ins { background: var(--teal); }
     .analysis-text { color: var(--muted); }
 
-    /* ── AI 용어 칩 ── */
-    .term-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
+    .term-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
     .term-chip {
       padding: 6px 14px;
       border: 1.5px solid var(--border);
@@ -180,7 +168,6 @@
     .term-chip:hover { border-color: var(--purple); color: var(--purple); }
     .term-chip.selected { background: var(--purple); color: white; border-color: var(--purple); }
 
-    /* ── 내 자료 ── */
     .input-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
     .input-tab {
       padding: 6px 14px;
@@ -238,7 +225,6 @@
     .file-drop.has-file { border-color: var(--green); color: var(--green); }
     #pdfInput { display: none; }
 
-    /* ── 요약 결과 ── */
     .summary-box {
       background: #F0FDF4;
       border: 1px solid #BBF7D0;
@@ -252,7 +238,6 @@
     }
     .summary-box.show { display: block; }
 
-    /* ── 주제 카드 ── */
     #topicCard { display: none; }
     #topicCard.show { display: block; }
     #topicText { padding: 4px 0; }
@@ -277,46 +262,19 @@
       border-radius: 4px;
       margin-top: 2px;
     }
-    .selected-art-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: #1D4ED8;
-      line-height: 1.5;
-    }
-    .topic-q {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.5;
-      margin-bottom: 8px;
-      text-align: center;
-    }
-    .topic-bg {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.7;
-      margin-bottom: 8px;
-      text-align: center;
-    }
+    .selected-art-name { font-size: 13px; font-weight: 500; color: #1D4ED8; line-height: 1.5; }
+    .topic-q { font-size: 18px; font-weight: 700; color: var(--text); line-height: 1.5; margin-bottom: 8px; text-align: center; }
+    .topic-bg { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 8px; text-align: center; }
 
-    /* ── 녹음 ── */
     .record-area { text-align: center; }
-    .record-btn-wrap { position: relative; display: inline-block; }
     #recordBtn {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: none;
+      width: 80px; height: 80px;
+      border-radius: 50%; border: none;
       background: linear-gradient(135deg, var(--blue), var(--purple));
-      color: white;
-      font-size: 32px;
-      cursor: pointer;
+      color: white; font-size: 32px; cursor: pointer;
       box-shadow: 0 4px 16px rgba(37,99,235,.4);
       transition: all .2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto;
     }
     #recordBtn:hover { transform: scale(1.05); }
     #recordBtn.recording {
@@ -324,20 +282,10 @@
       box-shadow: 0 4px 16px rgba(220,38,38,.4);
       animation: pulse 1.5s infinite;
     }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-    }
-    #timer {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text);
-      margin: 12px 0 4px;
-      font-variant-numeric: tabular-nums;
-    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    #timer { font-size: 28px; font-weight: 700; color: var(--text); margin: 12px 0 4px; font-variant-numeric: tabular-nums; }
     #recordStatus { font-size: 13px; color: var(--muted); }
 
-    /* ── 전사 ── */
     #transcriptBox {
       min-height: 80px;
       border: 1.5px solid var(--border);
@@ -351,18 +299,13 @@
     }
     #interimSpan { color: var(--muted); font-style: italic; }
 
-    /* ── 평가 결과 ── */
     #resultsSection { display: none; }
     #resultsSection.show { display: block; }
 
-    /* ── PREP 평가 결과 ── */
     .total-score-box {
-      text-align: center;
-      padding: 20px 16px;
+      text-align: center; padding: 20px 16px;
       background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
-      border: 1px solid #C7D2FE;
-      border-radius: 12px;
-      margin-bottom: 20px;
+      border: 1px solid #C7D2FE; border-radius: 12px; margin-bottom: 20px;
     }
     .total-score-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
     .total-score-num { font-size: 56px; font-weight: 700; line-height: 1; }
@@ -382,48 +325,31 @@
     .prep-denom { font-size: 13px; font-weight: 400; color: var(--muted); }
     .prep-good    { font-size: 13px; color: #166534; background: #F0FDF4; border-radius: 6px; padding: 6px 10px; margin-top: 4px; line-height: 1.5; }
     .prep-improve { font-size: 13px; color: #92400E; background: #FFFBEB; border-radius: 6px; padding: 6px 10px; margin-top: 4px; line-height: 1.5; }
-    /* ══ 모바일 (~ 767px) ══ */
+
     @media (max-width: 767px) {
       header { padding: 14px 16px; }
       header .logo { font-size: 22px; }
       header h1 { font-size: 17px; }
       header p  { display: none; }
-
       main { padding: 14px 12px 40px; }
       .card { padding: 16px 14px; margin-bottom: 14px; }
       .card-title { font-size: 12px; }
-
-      /* 모드 탭 — 3개가 한 줄에 작게 */
       .mode-tabs { padding: 4px; gap: 4px; }
       .tab-btn { font-size: 11px; padding: 8px 2px; }
-
-      /* 버튼 그룹 줄바꿈 */
       .flex.gap-8 { flex-wrap: wrap; }
       .btn { font-size: 13px; padding: 9px 14px; }
-
-      /* 국내/국외·인풋 탭 */
       .input-tabs { flex-wrap: wrap; gap: 6px; }
       .input-tab  { font-size: 12px; padding: 6px 12px; }
-
-      /* 뉴스 카드 */
       .news-item h4 { font-size: 13px; }
       .analysis-tag { font-size: 10px; padding: 2px 5px; }
       .analysis-text { font-size: 12px; }
       .news-source, .news-date { font-size: 10px; }
-
-      /* 용어 칩 */
       .term-chip { padding: 5px 10px; font-size: 12px; }
-
-      /* 주제 카드 */
       #topicText { font-size: 15px; }
-
-      /* 녹음 */
       #recordBtn { width: 68px; height: 68px; font-size: 26px; }
       #timer { font-size: 24px; }
       #recordStatus { font-size: 12px; }
       #transcriptBox { font-size: 13px; min-height: 64px; }
-
-      /* PREP 평가 결과 */
       .total-score-num { font-size: 42px; }
       .total-denom { font-size: 16px; }
       .prep-label { font-size: 12px; }
@@ -434,7 +360,6 @@
       .summary-box p, .next-goal-box p { font-size: 13px; }
     }
 
-    /* ══ 태블릿 (768px ~ 1023px) ══ */
     @media (min-width: 768px) and (max-width: 1023px) {
       main { padding: 20px 20px 44px; }
       .card { padding: 20px; }
@@ -446,210 +371,70 @@
     .summary-box {
       background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
       border: 1px solid #C7D2FE;
-      border-radius: 8px;
-      padding: 16px;
-      margin-top: 16px;
+      border-radius: 8px; padding: 16px; margin-top: 16px;
     }
     .summary-box strong, .next-goal-box strong {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--purple);
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      margin-bottom: 6px;
+      display: block; font-size: 11px; font-weight: 700; color: var(--purple);
+      text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px;
     }
     .summary-box p { font-size: 14px; color: #3730A3; line-height: 1.7; margin: 0; }
     .next-goal-box {
       background: linear-gradient(135deg, #F0FDF4, #ECFDF5);
-      border: 1px solid #BBF7D0;
-      border-radius: 8px;
-      padding: 16px;
-      margin-top: 10px;
+      border: 1px solid #BBF7D0; border-radius: 8px; padding: 16px; margin-top: 10px;
     }
     .next-goal-box p { font-size: 14px; color: #166534; line-height: 1.7; margin: 0; font-weight: 500; }
 
-    /* ── 주제 생성 버튼 (모드 하단) ── */
-    .topic-gen-wrap {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-    }
-    .topic-gen-btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: 600;
-      justify-content: center;
-      box-shadow: 0 2px 8px rgba(124,58,237,.3);
-    }
+    .topic-gen-wrap { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .topic-gen-btn { width: 100%; padding: 14px; font-size: 15px; font-weight: 600; justify-content: center; box-shadow: 0 2px 8px rgba(124,58,237,.3); }
 
-    /* ── 이중 레이더 차트 ── */
-    .charts-wrap {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
+    .charts-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     .chart-card { background: var(--bg); border-radius: 10px; padding: 12px 8px; }
     .chart-card-title { font-size: 13px; font-weight: 700; text-align: center; margin-bottom: 6px; }
 
-    /* ── 시간 선택 ── */
     .time-btn {
-      padding: 8px 20px;
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      background: white;
-      color: var(--muted);
-      transition: all .2s;
-      font-family: inherit;
+      padding: 8px 20px; border: 1.5px solid var(--border); border-radius: 20px;
+      font-size: 14px; font-weight: 600; cursor: pointer; background: white;
+      color: var(--muted); transition: all .2s; font-family: inherit;
     }
     .time-btn.active { background: var(--purple); color: white; border-color: var(--purple); }
 
-    /* ── 저장된 커스텀 용어 칩 ── */
     .saved-term-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 10px 5px 14px;
-      border: 1.5px solid var(--purple);
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      background: white;
-      color: var(--purple);
-      cursor: default;
-      transition: all .2s;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 10px 5px 14px; border: 1.5px solid var(--purple);
+      border-radius: 20px; font-size: 13px; font-weight: 500;
+      background: white; color: var(--purple); cursor: default; transition: all .2s;
     }
     .saved-term-chip:hover { background: #F5F3FF; }
     .saved-term-chip span:first-child { cursor: pointer; }
-    .saved-term-chip .delete-btn {
-      font-size: 12px;
-      color: var(--muted);
-      padding: 0 2px;
-      line-height: 1;
-      cursor: pointer;
-      transition: color .2s;
-    }
+    .saved-term-chip .delete-btn { font-size: 12px; color: var(--muted); padding: 0 2px; line-height: 1; cursor: pointer; transition: color .2s; }
     .saved-term-chip .delete-btn:hover { color: var(--red); }
 
-    #waveCanvas { display: block; background: transparent; }
-
-    /* ── 로딩 ── */
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,.4);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-    }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .loading-text { color: var(--muted); font-size: 13px; display: none; margin-top: 8px; }
     .loading-text.show { display: block; }
 
-    /* ── 에러 ── */
-    .error-box {
-      background: #FEF2F2;
-      border: 1px solid #FECACA;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 13px;
-      color: var(--red);
-      display: none;
-      margin-top: 10px;
-    }
+    .error-box { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--red); display: none; margin-top: 10px; }
     .error-box.show { display: block; }
-    .error-box.warn {
-      background: #FFFBEB;
-      border-color: #FDE68A;
-      color: #92400E;
-    }
-    .topic-warn {
-      background: #FFFBEB;
-      border: 1px solid #FDE68A;
-      color: #92400E;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .topic-err-msg {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
-      text-align: center;
-    }
+    .error-box.warn { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+    .topic-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; border-radius: 8px; padding: 12px 14px; font-size: 14px; line-height: 1.6; }
+    .topic-err-msg { color: var(--muted); font-size: 14px; line-height: 1.6; text-align: center; }
 
-    /* ── 헤더 도움말 버튼 ── */
     .help-btn {
-      margin-left: auto;
-      flex-shrink: 0;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(255,255,255,.4);
-      background: rgba(255,255,255,.15);
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background .2s;
+      margin-left: auto; flex-shrink: 0; width: 34px; height: 34px;
+      border-radius: 50%; border: 1.5px solid rgba(255,255,255,.4);
+      background: rgba(255,255,255,.15); color: white; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: background .2s;
     }
     .help-btn:hover { background: rgba(255,255,255,.3); }
 
-    /* ── 도움말 모달 ── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.show { display: flex; }
-    .modal-box {
-      background: white;
-      border-radius: 14px;
-      width: 100%;
-      max-width: 600px;
-      max-height: 82vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
-    }
-    .modal-header {
-      position: sticky;
-      top: 0;
-      background: white;
-      border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 1;
-      border-radius: 14px 14px 0 0;
-    }
+    .modal-box { background: white; border-radius: 14px; width: 100%; max-width: 600px; max-height: 82vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .modal-header { position: sticky; top: 0; background: white; border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1; border-radius: 14px 14px 0 0; }
     .modal-header h2 { font-size: 15px; font-weight: 700; color: var(--text); }
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      color: var(--muted);
-      padding: 4px 8px;
-      border-radius: 6px;
-      transition: background .15s;
-      line-height: 1;
-    }
+    .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--muted); padding: 4px 8px; border-radius: 6px; transition: background .15s; line-height: 1; }
     .modal-close:hover { background: var(--bg); }
     .modal-body { padding: 20px; }
     .modal-intro { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
@@ -658,33 +443,11 @@
     .modal-section h3 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
     .modal-criteria { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
     .modal-criterion { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; }
-    .modal-criterion-key {
-      flex-shrink: 0;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--purple);
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1px;
-    }
+    .modal-criterion-key { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--purple); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
     .modal-criterion-val { color: var(--text); }
-    .modal-source {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.7;
-      font-style: italic;
-      background: var(--bg);
-      border-radius: 6px;
-      padding: 10px 12px;
-    }
+    .modal-source { font-size: 11px; color: var(--muted); line-height: 1.7; font-style: italic; background: var(--bg); border-radius: 6px; padding: 10px 12px; }
     .modal-source strong { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; font-style: normal; text-transform: uppercase; letter-spacing: .5px; }
 
-    /* ── 유틸 ── */
     .flex { display: flex; }
     .gap-8 { gap: 8px; }
     .mt-12 { margin-top: 12px; }
@@ -702,7 +465,6 @@
   <button class="help-btn" onclick="openHelpModal()" title="평가 기준 안내">❓</button>
 </header>
 
-<!-- ════════════ 도움말 모달 ════════════ -->
 <div class="modal-overlay" id="helpModal" onclick="handleModalClick(event)">
   <div class="modal-box">
     <div class="modal-header">
@@ -711,93 +473,46 @@
     </div>
     <div class="modal-body">
       <p class="modal-intro">wellput-drill은 두 가지 검증된 학술 프레임워크를 결합하여 스피치를 평가합니다.</p>
-
-      <!-- 섹션 1: PREP -->
       <div class="modal-section">
         <h3>📐 1. PREP 프레임워크 (형식 평가)</h3>
         <div class="modal-criteria">
-          <div class="modal-criterion">
-            <span class="modal-criterion-key">P</span>
-            <span class="modal-criterion-val"><strong>Point</strong> — 결론을 먼저 말하기 (두괄식)</span>
-          </div>
-          <div class="modal-criterion">
-            <span class="modal-criterion-key">R</span>
-            <span class="modal-criterion-val"><strong>Reason</strong> — 주장을 뒷받침하는 근거 제시</span>
-          </div>
-          <div class="modal-criterion">
-            <span class="modal-criterion-key">E</span>
-            <span class="modal-criterion-val"><strong>Example</strong> — 구체적 사례/데이터 활용</span>
-          </div>
-          <div class="modal-criterion">
-            <span class="modal-criterion-key">P</span>
-            <span class="modal-criterion-val"><strong>Point</strong> — 마지막에 결론 다시 강조</span>
-          </div>
+          <div class="modal-criterion"><span class="modal-criterion-key">P</span><span class="modal-criterion-val"><strong>Point</strong> — 결론을 먼저 말하기 (두괄식)</span></div>
+          <div class="modal-criterion"><span class="modal-criterion-key">R</span><span class="modal-criterion-val"><strong>Reason</strong> — 주장을 뒷받침하는 근거 제시</span></div>
+          <div class="modal-criterion"><span class="modal-criterion-key">E</span><span class="modal-criterion-val"><strong>Example</strong> — 구체적 사례/데이터 활용</span></div>
+          <div class="modal-criterion"><span class="modal-criterion-key">P</span><span class="modal-criterion-val"><strong>Point</strong> — 마지막에 결론 다시 강조</span></div>
         </div>
-        <div class="modal-source">
-          <strong>출처</strong>
-          · 아리스토텔레스 《수사학》(Rhetoric, BC 4세기) — 4단계 논증 구조에서 유래<br>
-          · Harvard Business School — OREO 기법으로 교육<br>
-          · 이기주·박소영 (2019). 「프렙(PREP)을 활용한 한 문단 쓰기 수업 모형 연구」. <em>작문연구</em>, 43, 141–171. 한국작문학회
-        </div>
+        <div class="modal-source"><strong>출처</strong>· 아리스토텔레스 《수사학》(Rhetoric, BC 4세기)<br>· Harvard Business School — OREO 기법으로 교육<br>· 이기주·박소영 (2019). 「프렙(PREP)을 활용한 한 문단 쓰기 수업 모형 연구」. <em>작문연구</em>, 43, 141–171.</div>
       </div>
-
-      <!-- 섹션 2: Toulmin -->
       <div class="modal-section">
         <h3>💡 2. Toulmin 논증 모델 (내용 평가)</h3>
         <div class="modal-criteria">
-          <div class="modal-criterion">
-            <span class="modal-criterion-val"><strong>주제 연관성</strong> — 주장이 주제에 맞는가 (Claim)</span>
-          </div>
-          <div class="modal-criterion">
-            <span class="modal-criterion-val"><strong>논리적 타당성</strong> — 근거가 주장을 타당하게 뒷받침하는가 (Warrant)</span>
-          </div>
-          <div class="modal-criterion">
-            <span class="modal-criterion-val"><strong>내용의 깊이</strong> — 증거의 질과 양이 충분한가 (Grounds)</span>
-          </div>
+          <div class="modal-criterion"><span class="modal-criterion-val"><strong>주제 연관성</strong> — 주장이 주제에 맞는가 (Claim)</span></div>
+          <div class="modal-criterion"><span class="modal-criterion-val"><strong>논리적 타당성</strong> — 근거가 주장을 타당하게 뒷받침하는가 (Warrant)</span></div>
+          <div class="modal-criterion"><span class="modal-criterion-val"><strong>내용의 깊이</strong> — 증거의 질과 양이 충분한가 (Grounds)</span></div>
         </div>
-        <div class="modal-source">
-          <strong>출처</strong>
-          · Toulmin, S. E. (1958). <em>The Uses of Argument</em>. Cambridge University Press.<br>
-          · Simon, S. (2008). Using Toulmin's Argument Pattern in the evaluation of argumentation in school science. <em>Research in Science Education</em>.
-        </div>
+        <div class="modal-source"><strong>출처</strong>· Toulmin, S. E. (1958). <em>The Uses of Argument</em>. Cambridge University Press.</div>
       </div>
-
-      <!-- 섹션 3: 전달 명확성 -->
       <div class="modal-section">
         <h3>🗣️ 3. 전달 명확성</h3>
-        <div class="modal-criteria">
-          <div class="modal-criterion">
-            <span class="modal-criterion-val">문장이 명확하고 이해하기 쉬운가</span>
-          </div>
-        </div>
-        <div class="modal-source">
-          <strong>출처</strong>
-          · NCA (National Communication Association). <em>The Competent Speaker Speech Evaluation Form</em> (2nd ed., 1993–2013). 미국 커뮤니케이션학회 공식 스피치 평가 도구
-        </div>
+        <div class="modal-criteria"><div class="modal-criterion"><span class="modal-criterion-val">문장이 명확하고 이해하기 쉬운가</span></div></div>
+        <div class="modal-source"><strong>출처</strong>· NCA (National Communication Association). <em>The Competent Speaker Speech Evaluation Form</em> (2nd ed., 1993–2013).</div>
       </div>
     </div>
   </div>
 </div>
 
 <main>
-
-  <!-- ── 모드 선택 ── -->
   <div class="mode-tabs">
     <button class="tab-btn active" onclick="setMode('news')">📰 AI 뉴스 모드</button>
     <button class="tab-btn"        onclick="setMode('term')">🔑 AI 용어 모드</button>
     <button class="tab-btn"        onclick="setMode('custom')">📄 내 자료 모드</button>
   </div>
 
-  <!-- ════════════ AI 뉴스 모드 ════════════ -->
   <div class="mode-content active card" id="mode-news">
     <div class="card-title">📰 최신 AI 뉴스</div>
     <div class="flex gap-8">
-      <button class="btn btn-primary" id="loadDomesticBtn" onclick="loadDomesticNews()" style="flex:1">
-        🇰🇷 국내뉴스 불러오기
-      </button>
-      <button class="btn btn-teal" id="loadIntlBtn" onclick="loadInternationalNews()" style="flex:1">
-        🌐 국외뉴스 불러오기
-      </button>
+      <button class="btn btn-primary" id="loadDomesticBtn" onclick="loadDomesticNews()" style="flex:1">🇰🇷 국내뉴스 불러오기</button>
+      <button class="btn btn-teal" id="loadIntlBtn" onclick="loadInternationalNews()" style="flex:1">🌐 국외뉴스 불러오기</button>
     </div>
     <p class="loading-text" id="newsLoading">뉴스를 가져오는 중...</p>
     <div class="error-box" id="newsError"></div>
@@ -808,7 +523,6 @@
     </div>
   </div>
 
-  <!-- ════════════ AI 용어 모드 ════════════ -->
   <div class="mode-content card" id="mode-term">
     <div class="card-title">🔑 AI 핵심 용어</div>
     <div class="flex gap-8">
@@ -816,14 +530,10 @@
     </div>
     <div class="term-grid" id="termGrid"></div>
     <div class="error-box" id="termError"></div>
-
-    <!-- 직접 입력 -->
     <div id="customTermArea" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
       <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">💬 AI/Tech 용어 직접 입력</div>
       <div style="display:flex;gap:8px">
-        <input type="text" id="customTermInput"
-          placeholder="AI/Tech 관련 용어를 입력하세요 (예: LoRA, Kubernetes, GraphQL...)"
-          onkeydown="if(event.key==='Enter') checkAndAddTerm()" />
+        <input type="text" id="customTermInput" placeholder="AI/Tech 관련 용어를 입력하세요 (예: LoRA, Kubernetes, GraphQL...)" onkeydown="if(event.key==='Enter') checkAndAddTerm()" />
         <button class="btn btn-purple" onclick="checkAndAddTerm()" id="checkTermBtn">✅ 확인 &amp; 추가</button>
       </div>
       <p class="loading-text" id="termCheckLoading">AI 용어 여부 확인 중...</p>
@@ -833,31 +543,24 @@
         <div id="savedTermsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
     </div>
-
     <div class="topic-gen-wrap" id="termTopicBtnWrap" style="display:none">
       <button class="btn btn-purple topic-gen-btn" id="termTopicBtn" onclick="generateTermTopic()">✨ 오늘의 스피치 주제 생성</button>
     </div>
   </div>
 
-  <!-- ════════════ 내 자료 모드 ════════════ -->
   <div class="mode-content card" id="mode-custom">
     <div class="card-title">📄 내 자료로 주제 만들기</div>
-
     <div class="input-tabs">
       <button class="input-tab active" onclick="setInputTab('url')">🔗 URL</button>
       <button class="input-tab"        onclick="setInputTab('text')">✏️ 텍스트</button>
       <button class="input-tab"        onclick="setInputTab('pdf')">📑 PDF</button>
     </div>
-
-    <!-- URL -->
     <div class="input-panel active" id="panel-url">
       <input type="url" id="urlInput" placeholder="https://example.com/article" />
     </div>
-    <!-- Text -->
     <div class="input-panel" id="panel-text">
       <textarea id="textInput" rows="5" placeholder="분석할 텍스트를 붙여넣으세요..."></textarea>
     </div>
-    <!-- PDF -->
     <div class="input-panel" id="panel-pdf">
       <div class="file-drop" id="fileDrop" onclick="document.getElementById('pdfInput').click()">
         <div style="font-size:32px;margin-bottom:8px">📑</div>
@@ -865,11 +568,8 @@
       </div>
       <input type="file" id="pdfInput" accept=".pdf" onchange="handlePDF(this)" />
     </div>
-
     <div class="mt-12 flex gap-8">
-      <button class="btn btn-teal" id="summarizeBtn" onclick="summarizeContent()">
-        🔍 요약 & 분석
-      </button>
+      <button class="btn btn-teal" id="summarizeBtn" onclick="summarizeContent()">🔍 요약 &amp; 분석</button>
     </div>
     <p class="loading-text" id="customLoading">분석 중...</p>
     <div class="error-box" id="customError"></div>
@@ -879,7 +579,6 @@
     </div>
   </div>
 
-  <!-- ════════════ 오늘의 주제 ════════════ -->
   <div class="card" id="topicCard">
     <div class="card-title">💬 오늘의 스피치 주제</div>
     <div id="selectedArticleBox" style="display:none">
@@ -893,10 +592,8 @@
     <p style="font-size:13px;color:var(--muted);text-align:center">아래에서 음성을 녹음하고 스피치를 평가받아보세요</p>
   </div>
 
-  <!-- ════════════ 녹음 ════════════ -->
   <div class="card" id="recordCard">
     <div class="card-title">🎙️ 스피치 녹음</div>
-
     <div class="record-area">
       <div id="timeSelector" style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
         <button class="time-btn active" onclick="selectTime(1)">1분</button>
@@ -904,14 +601,10 @@
         <button class="time-btn" onclick="selectTime(5)">5분</button>
       </div>
       <button id="recordBtn" onclick="toggleRecording()">🎤</button>
-      <canvas id="waveCanvas" width="300" height="60"
-        style="display:none; margin:8px auto; border-radius:8px;"></canvas>
       <div id="timer">1:00</div>
       <div id="recordStatus">버튼을 눌러 녹음을 시작하세요</div>
     </div>
-
     <div class="divider"></div>
-
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span class="card-title" style="margin:0">📝 인식된 텍스트</span>
       <button class="btn btn-outline" style="font-size:12px;padding:6px 12px" onclick="clearTranscript()">지우기</button>
@@ -919,21 +612,15 @@
     <div id="transcriptBox">
       <span id="finalSpan"></span><span id="interimSpan"></span>
     </div>
-
     <div class="mt-12 flex gap-8" style="justify-content:center">
-      <button class="btn btn-success" id="evalBtn" onclick="evaluateSpeech()" disabled>
-        📊 논리 구조 평가
-      </button>
+      <button class="btn btn-success" id="evalBtn" onclick="evaluateSpeech()" disabled>📊 논리 구조 평가</button>
     </div>
     <p class="loading-text" id="evalLoading" style="text-align:center">Gemini가 스피치를 분석하는 중...</p>
     <div class="error-box" id="evalError"></div>
   </div>
 
-  <!-- ════════════ 평가 결과 ════════════ -->
   <div class="card" id="resultsSection">
     <div class="card-title">📊 스피치 평가 결과</div>
-
-    <!-- 레이더 차트 2개 -->
     <div class="charts-wrap">
       <div class="chart-card">
         <div class="chart-card-title" style="color:#7C3AED">📐 PREP 형식 평가</div>
@@ -944,53 +631,33 @@
         <canvas id="contentChart"></canvas>
       </div>
     </div>
-
     <div class="divider"></div>
-
-    <!-- PREP 형식 섹션 -->
     <div class="card-title" style="color:#7C3AED">📐 PREP 형식</div>
     <div class="prep-list" id="prepFeedback"></div>
-
-    <!-- 내용 평가 섹션 -->
     <div class="card-title" style="color:#2563EB;margin-top:16px">💡 내용 평가</div>
     <div class="prep-list" id="contentFeedback"></div>
-
-    <!-- 전달력 섹션 -->
     <div class="card-title" style="color:#0891B2;margin-top:16px">🗣️ 전달력</div>
     <div class="prep-list" id="deliveryFeedback"></div>
-
     <div class="divider"></div>
-
-    <!-- 종합 점수 -->
     <div class="total-score-box">
       <div class="total-score-label">종합 점수</div>
-      <div>
-        <span class="total-score-num" id="totalScoreNum">—</span>
-        <span class="total-denom">/100</span>
-      </div>
+      <div><span class="total-score-num" id="totalScoreNum">—</span><span class="total-denom">/100</span></div>
     </div>
-
-    <!-- 총평 -->
     <div class="summary-box">
       <strong>💬 종합 총평</strong>
       <p id="summaryText"></p>
     </div>
-
-    <!-- 다음 목표 -->
     <div class="next-goal-box">
       <strong>🎯 다음 스피치 목표</strong>
       <p id="nextGoalText"></p>
     </div>
-
     <div class="mt-12" style="text-align:center">
       <button class="btn btn-primary" onclick="resetEval()">🔄 다시 연습하기</button>
     </div>
   </div>
-
 </main>
 
 <script>
-  // ─────────────── 상태 ───────────────
   let currentMode = 'news';
   let currentTopic = '';
   let domesticArticles = [];
@@ -1005,11 +672,7 @@
   let isRecording = false;
   let recognition = null;
   let finalTranscript = '';
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let audioBlob = null;
   let timerInterval = null;
-  let recordingSeconds = 0;   // 미사용 (하위 호환 유지)
   let selectedMinutes = 1;
   let totalSeconds    = 60;
   let remainingSeconds = 60;
@@ -1017,12 +680,6 @@
   let radarChart1 = null;
   let radarChart2 = null;
 
-  let audioContext  = null;
-  let analyser      = null;
-  let waveAnimFrame = null;
-  let micStream     = null;
-
-  // ─────────────── AI 용어 목록 ───────────────
   const AI_TERMS = [
     { term: 'LLM', desc: 'Large Language Model' },
     { term: 'RAG', desc: 'Retrieval-Augmented Generation' },
@@ -1046,84 +703,57 @@
     { term: 'MoE', desc: 'Mixture of Experts' },
   ];
 
-  // ─────────────── 초기화 ───────────────
   document.addEventListener('DOMContentLoaded', () => {
     renderTermGrid();
     setupSpeechRecognition();
     loadCustomTerms();
   });
 
-  // ─────────────── 모드 전환 ───────────────
   function setMode(mode) {
     currentMode = mode;
     document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(`mode-${mode}`).classList.add('active');
     event.currentTarget.classList.add('active');
-
-    // 1. 진행 중인 녹음 중지
     if (isRecording) stopRecording();
-
-    // 파형 정리 (녹음 중이 아닐 때도 혹시 남아있으면 제거)
-    if (waveAnimFrame) { cancelAnimationFrame(waveAnimFrame); waveAnimFrame = null; }
-    document.getElementById('waveCanvas').style.display = 'none';
-    if (audioContext) { audioContext.close(); audioContext = null; analyser = null; }
-
-    // 2. 타이머 초기화
     clearInterval(timerInterval);
     remainingSeconds = totalSeconds;
     document.getElementById('timer').textContent = `${selectedMinutes}:00`;
     document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
     document.getElementById('recordBtn').classList.remove('recording');
     document.getElementById('recordBtn').innerHTML = '🎤';
-
-    // 3. STT 텍스트 초기화
     finalTranscript = '';
     document.getElementById('finalSpan').textContent = '';
     document.getElementById('interimSpan').textContent = '';
-
-    // 4. 평가 버튼 비활성화
     document.getElementById('evalBtn').disabled = true;
-
-    // 5. 주제 카드 숨기기
     document.getElementById('topicCard').classList.remove('show');
     document.getElementById('topicText').innerHTML = '';
     document.getElementById('selectedArticleBox').style.display = 'none';
-
-    // 6. 평가 결과 숨기기
     document.getElementById('resultsSection').classList.remove('show');
-
-    // 7. 에러박스 초기화
-    ['newsError', 'termError', 'termCheckError', 'customError', 'evalError'].forEach(id => {
+    ['newsError','termError','termCheckError','customError','evalError'].forEach(id => {
       document.getElementById(id).classList.remove('show');
     });
   }
 
-  // ─────────────── 뉴스 모드 ───────────────
   async function loadDomesticNews() {
     const btn = document.getElementById('loadDomesticBtn');
     const loadingEl = document.getElementById('newsLoading');
-    const errorEl   = document.getElementById('newsError');
-
+    const errorEl = document.getElementById('newsError');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> 불러오는 중...';
     loadingEl.classList.add('show');
     errorEl.classList.remove('show');
     document.getElementById('domesticList').innerHTML = '';
-
     try {
-      const res  = await fetch('/api/news?type=domestic');
+      const res = await fetch('/api/news?type=domestic');
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || '국내 뉴스를 가져올 수 없습니다.');
-
       domesticArticles = data.domestic || [];
       selectedNewsLinks.clear();
-
       renderNewsList(domesticArticles, 'domesticList', 'd_');
       setNewsTab('domestic');
-      if (domesticArticles.length > 0 || internationalArticles.length > 0) {
+      if (domesticArticles.length > 0 || internationalArticles.length > 0)
         document.getElementById('newsTopicBtnWrap').style.display = '';
-      }
     } catch (e) {
       errorEl.textContent = '❌ ' + e.message;
       errorEl.classList.add('show');
@@ -1137,27 +767,22 @@
   async function loadInternationalNews() {
     const btn = document.getElementById('loadIntlBtn');
     const loadingEl = document.getElementById('newsLoading');
-    const errorEl   = document.getElementById('newsError');
-
+    const errorEl = document.getElementById('newsError');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> 불러오는 중...';
     loadingEl.classList.add('show');
     errorEl.classList.remove('show');
     document.getElementById('internationalList').innerHTML = '';
-
     try {
-      const res  = await fetch('/api/news?type=international');
+      const res = await fetch('/api/news?type=international');
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || '국외 뉴스를 가져올 수 없습니다.');
-
       internationalArticles = data.international || [];
       selectedNewsLinks.clear();
-
       renderNewsList(internationalArticles, 'internationalList', 'i_');
       setNewsTab('international');
-      if (domesticArticles.length > 0 || internationalArticles.length > 0) {
+      if (domesticArticles.length > 0 || internationalArticles.length > 0)
         document.getElementById('newsTopicBtnWrap').style.display = '';
-      }
     } catch (e) {
       errorEl.textContent = '❌ ' + e.message;
       errorEl.classList.add('show');
@@ -1178,23 +803,7 @@
   function renderNewsList(articles, listId, prefix) {
     const listEl = document.getElementById(listId);
     listEl.innerHTML = articles.map((a, i) => {
-      const keywords   = Array.isArray(a.keywords) ? a.keywords.join(', ') : '';
-      const analysisHtml = `
-        <div class="news-analysis">
-          <div class="analysis-row">
-            <span class="analysis-tag">한글요약</span>
-            <span class="analysis-text">${escHtml(a.summary || '분석 정보 없음')}</span>
-          </div>
-          <div class="analysis-row">
-            <span class="analysis-tag kw">핵심키워드</span>
-            <span class="analysis-text">${escHtml(keywords || '-')}</span>
-          </div>
-          <div class="analysis-row">
-            <span class="analysis-tag ins">핵심인사이트</span>
-            <span class="analysis-text">${escHtml(a.insight || '-')}</span>
-          </div>
-        </div>`;
-
+      const keywords = Array.isArray(a.keywords) ? a.keywords.join(', ') : '';
       return `
       <div class="news-item" onclick="selectNews('${escHtml(a.link)}', this)" id="${prefix}${i}">
         <a class="news-link" href="${escHtml(a.link)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
@@ -1202,98 +811,69 @@
         </a>
         <div class="news-meta">
           <span class="news-source">${escHtml(a.source)}</span>
-          <span class="news-date">${escHtml(a.pubDate?.slice(0, 10) || '')}</span>
+          <span class="news-date">${escHtml(a.pubDate?.slice(0,10)||'')}</span>
         </div>
-        ${analysisHtml}
+        <div class="news-analysis">
+          <div class="analysis-row"><span class="analysis-tag">한글요약</span><span class="analysis-text">${escHtml(a.summary||'분석 정보 없음')}</span></div>
+          <div class="analysis-row"><span class="analysis-tag kw">핵심키워드</span><span class="analysis-text">${escHtml(keywords||'-')}</span></div>
+          <div class="analysis-row"><span class="analysis-tag ins">핵심인사이트</span><span class="analysis-text">${escHtml(a.insight||'-')}</span></div>
+        </div>
       </div>`;
     }).join('');
   }
 
   function selectNews(link, el) {
-    if (selectedNewsLinks.has(link)) {
-      selectedNewsLinks.delete(link);
-      el.classList.remove('selected');
-    } else {
-      selectedNewsLinks.add(link);
-      el.classList.add('selected');
-    }
+    if (selectedNewsLinks.has(link)) { selectedNewsLinks.delete(link); el.classList.remove('selected'); }
+    else { selectedNewsLinks.add(link); el.classList.add('selected'); }
   }
 
   async function generateNewsTopic() {
     const tabArticles = currentNewsTab === 'domestic' ? domesticArticles : internationalArticles;
-    const selected    = tabArticles.filter(a => selectedNewsLinks.has(a.link));
-    const articles    = selected.length > 0 ? selected : tabArticles;
-    await callTopicAPI({ mode: 'news', articles });
+    const selected = tabArticles.filter(a => selectedNewsLinks.has(a.link));
+    await callTopicAPI({ mode: 'news', articles: selected.length > 0 ? selected : tabArticles });
   }
 
-  // ─────────────── 용어 모드 ───────────────
   function renderTermGrid() {
-    const grid = document.getElementById('termGrid');
-    grid.innerHTML = AI_TERMS.map(t => `
+    document.getElementById('termGrid').innerHTML = AI_TERMS.map(t => `
       <div class="term-chip" onclick="selectTerm('${escHtml(t.term)}')" id="chip-${t.term.replace(/\s+/g,'_')}">
         <strong>${escHtml(t.term)}</strong><br/>
         <span style="font-size:11px;opacity:.7">${escHtml(t.desc)}</span>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
   function selectRandomTerm() {
     const t = AI_TERMS[Math.floor(Math.random() * AI_TERMS.length)];
     selectTerm(t.term);
-    document.getElementById(`chip-${t.term.replace(/\s+/g,'_')}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById(`chip-${t.term.replace(/\s+/g,'_')}`)?.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 
   function selectTerm(term, el) {
     document.querySelectorAll('.term-chip').forEach(e => e.classList.remove('selected'));
-    if (el) {
-      el.classList.add('selected');
-    } else {
-      document.getElementById(`chip-${term.replace(/\s+/g, '_')}`)?.classList.add('selected');
-    }
+    if (el) el.classList.add('selected');
+    else document.getElementById(`chip-${term.replace(/\s+/g,'_')}`)?.classList.add('selected');
     selectedTerm = term;
     document.getElementById('termTopicBtnWrap').style.display = '';
     document.getElementById('termError').classList.remove('show');
   }
 
-  // ─────────────── 직접 입력 용어 ───────────────
   async function checkAndAddTerm() {
-    const input   = document.getElementById('customTermInput');
-    const term    = input.value.trim();
+    const input = document.getElementById('customTermInput');
+    const term = input.value.trim();
     if (!term) return;
-
     const loadingEl = document.getElementById('termCheckLoading');
-    const errorEl   = document.getElementById('termCheckError');
-    const btn       = document.getElementById('checkTermBtn');
-
+    const errorEl = document.getElementById('termCheckError');
+    const btn = document.getElementById('checkTermBtn');
     btn.disabled = true;
     loadingEl.classList.add('show');
     errorEl.classList.remove('show');
-
     try {
-      const res  = await fetch('/api/check-term', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ term })
-      });
+      const res = await fetch('/api/check-term', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({term}) });
       const data = await res.json();
-
-      if (!res.ok) {
-        errorEl.textContent = data.error || '일시적인 오류가 발생했습니다. 다시 시도해주세요.';
-        errorEl.classList.add('show');
-        return;
-      }
-
-      if (!data.isAiTerm) {
-        errorEl.textContent = `"${term}"은(는) AI/Tech 관련 용어가 아닙니다. 기술 분야 용어를 입력해주세요.`;
-        errorEl.classList.add('show');
-        return;
-      }
-
+      if (!res.ok) { errorEl.textContent = data.error || '일시적인 오류가 발생했습니다.'; errorEl.classList.add('show'); return; }
+      if (!data.isAiTerm) { errorEl.textContent = `"${term}"은(는) AI/Tech 관련 용어가 아닙니다. 기술 분야 용어를 입력해주세요.`; errorEl.classList.add('show'); return; }
       addCustomTermChip(term, data.desc || term);
       input.value = '';
       errorEl.classList.remove('show');
-
-      // savedTermsList에도 칩 추가 (중복 방지)
       const area = document.getElementById('savedTermsArea');
       const list = document.getElementById('savedTermsList');
       if (!list.querySelector(`[data-saved-term=${JSON.stringify(term)}]`)) {
@@ -1301,7 +881,7 @@
         list.appendChild(createSavedTermChip(term, data.desc || term));
       }
     } catch (e) {
-      errorEl.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+      errorEl.textContent = '네트워크 오류가 발생했습니다.';
       errorEl.classList.add('show');
     } finally {
       btn.disabled = false;
@@ -1312,20 +892,17 @@
   function addCustomTermChip(term, desc) {
     const existing = document.querySelector(`.term-chip[data-term="${CSS.escape(term)}"]`);
     if (existing) { selectTerm(term, existing); return; }
-
     const chip = document.createElement('div');
     chip.className = 'term-chip';
     chip.dataset.term = term;
     chip.title = desc;
     chip.innerHTML = `<strong>${escHtml(term)}</strong><br/><span style="font-size:11px;opacity:.7">✏️ ${escHtml(desc)}</span>`;
     chip.onclick = () => selectTerm(term, chip);
-
     document.getElementById('termGrid').appendChild(chip);
     selectTerm(term, chip);
-    chip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    chip.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 
-  // ─────────────── 저장된 커스텀 용어 ───────────────
   function selectTermByName(term) {
     const chip = document.querySelector(`.term-chip[data-term="${CSS.escape(term)}"]`);
     selectTerm(term, chip || null);
@@ -1335,21 +912,15 @@
     const chip = document.createElement('div');
     chip.className = 'saved-term-chip';
     chip.dataset.savedTerm = term;
-
     const termSpan = document.createElement('span');
     termSpan.textContent = term;
     termSpan.style.cursor = 'pointer';
     termSpan.onclick = () => selectTermByName(term);
-
     const deleteBtn = document.createElement('span');
     deleteBtn.className = 'delete-btn';
     deleteBtn.textContent = '✕';
     deleteBtn.title = '삭제';
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
-      deleteCustomTerm(term, chip);
-    };
-
+    deleteBtn.onclick = (e) => { e.stopPropagation(); deleteCustomTerm(term, chip); };
     chip.appendChild(termSpan);
     chip.appendChild(deleteBtn);
     return chip;
@@ -1357,46 +928,32 @@
 
   async function loadCustomTerms() {
     try {
-      const res  = await fetch('/api/custom-terms');
+      const res = await fetch('/api/custom-terms');
       const data = await res.json();
       if (!data.terms || data.terms.length === 0) return;
-
       const area = document.getElementById('savedTermsArea');
       const list = document.getElementById('savedTermsList');
       list.innerHTML = '';
       area.style.display = 'block';
-
       data.terms.forEach(({ term, desc }) => {
         addCustomTermChip(term, desc || term);
         list.appendChild(createSavedTermChip(term, desc || term));
       });
-    } catch (e) {
-      console.error('저장된 용어 불러오기 실패:', e);
-    }
+    } catch (e) { console.error('저장된 용어 불러오기 실패:', e); }
   }
 
   async function deleteCustomTerm(term, chipEl) {
     if (!confirm(`"${term}" 용어를 삭제할까요?`)) return;
     try {
-      const res = await fetch('/api/custom-terms', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ term })
-      });
+      const res = await fetch('/api/custom-terms', { method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({term}) });
       if (!res.ok) throw new Error();
-
       chipEl.remove();
       const gridChip = document.querySelector(`.term-chip[data-term="${CSS.escape(term)}"]`);
       if (gridChip) gridChip.remove();
       const list = document.getElementById('savedTermsList');
       if (list.children.length === 0) document.getElementById('savedTermsArea').style.display = 'none';
-      if (selectedTerm === term) {
-        selectedTerm = null;
-        document.getElementById('termTopicBtnWrap').style.display = 'none';
-      }
-    } catch (e) {
-      alert('삭제 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
+      if (selectedTerm === term) { selectedTerm = null; document.getElementById('termTopicBtnWrap').style.display = 'none'; }
+    } catch (e) { alert('삭제 중 오류가 발생했습니다.'); }
   }
 
   async function generateTermTopic() {
@@ -1404,7 +961,6 @@
     await callTopicAPI({ mode: 'term', term: selectedTerm });
   }
 
-  // ─────────────── 내 자료 모드 ───────────────
   function setInputTab(type) {
     customInputType = type;
     document.querySelectorAll('.input-tab').forEach(el => el.classList.remove('active'));
@@ -1430,9 +986,7 @@
     const loadingEl = document.getElementById('customLoading');
     const errorEl = document.getElementById('customError');
     const summaryBox = document.getElementById('summaryBox');
-
     let body = { type: customInputType };
-
     if (customInputType === 'url') {
       const url = document.getElementById('urlInput').value.trim();
       if (!url) return showError('customError', 'URL을 입력해주세요.');
@@ -1445,31 +999,23 @@
       if (!pdfBase64) return showError('customError', 'PDF 파일을 먼저 선택해주세요.');
       body.pdfBase64 = pdfBase64;
     }
-
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> 분석 중...';
     loadingEl.classList.add('show');
     errorEl.classList.remove('show');
     summaryBox.classList.remove('show');
-
     try {
-      const res = await fetch('/api/summarize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+      const res = await fetch('/api/summarize', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error);
-
       customSummary = data.summary;
       summaryBox.textContent = data.summary;
       summaryBox.classList.add('show');
       document.getElementById('customTopicBtnWrap').style.display = '';
-    } catch (e) {
-      showError('customError', e.message);
-    } finally {
+    } catch (e) { showError('customError', e.message); }
+    finally {
       btn.disabled = false;
-      btn.innerHTML = '🔍 요약 & 분석';
+      btn.innerHTML = '🔍 요약 &amp; 분석';
       loadingEl.classList.remove('show');
     }
   }
@@ -1479,85 +1025,55 @@
     await callTopicAPI({ mode: 'custom', summary: customSummary });
   }
 
-  // ─────────────── 주제 생성 (공통) ───────────────
   async function callTopicAPI(body) {
     const topicCard = document.getElementById('topicCard');
     const topicTextEl = document.getElementById('topicText');
     topicTextEl.innerHTML = '<div class="topic-bg">주제를 생성하는 중...</div>';
     topicCard.classList.add('show');
-
     try {
-      const res = await fetch('/api/topic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+      const res = await fetch('/api/topic', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
       const data = await res.json();
-      if (!res.ok || data.error) {
-        const err = new Error(data.error || '오류가 발생했습니다.');
-        err.isRateLimit = !!data.isRateLimit;
-        throw err;
-      }
-
+      if (!res.ok || data.error) { const err = new Error(data.error||'오류가 발생했습니다.'); err.isRateLimit = !!data.isRateLimit; throw err; }
       currentTopic = data.topic;
-
-      // 선정 기사 표시 (뉴스 모드)
       const selectedBox = document.getElementById('selectedArticleBox');
-      if (data.selectedArticle) {
-        document.getElementById('selectedArticleTitle').textContent = data.selectedArticle;
-        selectedBox.style.display = '';
-      } else {
-        selectedBox.style.display = 'none';
-      }
-
-      // 3문장 구조 렌더링 (첫/마지막 줄 = 질문, 가운데 = 배경)
-      const lines = (data.topic || '').split('\n').map(l => l.trim()).filter(Boolean);
+      if (data.selectedArticle) { document.getElementById('selectedArticleTitle').textContent = data.selectedArticle; selectedBox.style.display = ''; }
+      else selectedBox.style.display = 'none';
+      const lines = (data.topic||'').split('\n').map(l=>l.trim()).filter(Boolean);
       if (lines.length >= 2) {
-        topicTextEl.innerHTML = lines.map((line, i) => {
-          const isQ = i === 0 || i === lines.length - 1;
-          return `<div class="${isQ ? 'topic-q' : 'topic-bg'}">${escHtml(line)}</div>`;
-        }).join('');
+        topicTextEl.innerHTML = lines.map((line,i) => `<div class="${i===0||i===lines.length-1?'topic-q':'topic-bg'}">${escHtml(line)}</div>`).join('');
       } else {
-        topicTextEl.innerHTML = `<div class="topic-q">${escHtml(data.topic || '')}</div>`;
+        topicTextEl.innerHTML = `<div class="topic-q">${escHtml(data.topic||'')}</div>`;
       }
-
-      document.getElementById('recordCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('recordCard').scrollIntoView({ behavior:'smooth', block:'start' });
     } catch (e) {
-      const isRateLimit = (e.message || '').includes('혼잡') || e.isRateLimit;
+      const isRateLimit = (e.message||'').includes('혼잡') || e.isRateLimit;
       topicTextEl.innerHTML = isRateLimit
         ? `<div class="topic-warn">⚠️ ${escHtml(e.message)}</div>`
         : `<div class="topic-err-msg">오늘의 주제를 불러오는 데 실패했습니다.<br>잠시 후 '주제 생성' 버튼을 다시 눌러주세요.</div>`;
     }
   }
 
-  // ─────────────── Web Speech API ───────────────
+  // ── Web Speech API ──────────────────────────────
   function setupSpeechRecognition() {
-    // 브라우저 지원 여부 체크만 수행 (recognition 객체 생성은 startRecording에서)
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       document.getElementById('recordBtn').disabled = true;
-      document.getElementById('recordStatus').textContent =
-        '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.';
+      document.getElementById('recordStatus').textContent = '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.';
     }
   }
 
-  // ─────────────── 시간 선택 ───────────────
   function selectTime(minutes) {
-    selectedMinutes  = minutes;
-    totalSeconds     = minutes * 60;
+    selectedMinutes = minutes;
+    totalSeconds = minutes * 60;
     remainingSeconds = minutes * 60;
     document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
     event.currentTarget.classList.add('active');
     document.getElementById('timer').textContent = `${minutes}:00`;
   }
 
-  // ─────────────── 녹음 토글 ───────────────
   async function toggleRecording() {
-    if (!isRecording) {
-      await startRecording();
-    } else {
-      stopRecording();
-    }
+    if (!isRecording) await startRecording();
+    else stopRecording();
   }
 
   async function startRecording() {
@@ -1567,88 +1083,74 @@
     document.getElementById('evalBtn').disabled = true;
     document.getElementById('resultsSection').classList.remove('show');
 
-    // 1. recognition 먼저 생성 및 시작 (마이크 독립 접근)
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+
     recognition = new SR();
     recognition.lang = 'ko-KR';
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    recognition.onstart = () => console.log('[STT] onstart - 인식 시작');
     recognition.onresult = (event) => {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += t;
-        } else {
-          interim += t;
-        }
+        if (event.results[i].isFinal) finalTranscript += t;
+        else interim += t;
       }
-      console.log('[STT] onresult:', finalTranscript, '|', interim);
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = interim;
       document.getElementById('evalBtn').disabled = !finalTranscript.trim();
     };
+
     recognition.onerror = (e) => {
       if (e.error === 'aborted' || e.error === 'no-speech') return;
-      console.error('[STT] onerror:', e.error);
       if (e.error === 'not-allowed') {
-        document.getElementById('recordStatus').textContent =
-          '⚠️ 마이크 권한이 차단되어 있습니다.';
+        document.getElementById('recordStatus').textContent = '⚠️ 마이크 권한이 차단되어 있습니다. 주소창 자물쇠 아이콘에서 허용해주세요.';
         stopRecording();
       }
     };
+
     recognition.onend = () => {
-      console.log('[STT] onend, isRecording:', isRecording);
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = '';
       if (isRecording) {
-        setTimeout(() => {
-          try { recognition.start(); } catch (e) {}
-        }, 100);
+        // 끊김 방지: 새 인스턴스로 재시작
+        const SR2 = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SR2();
+        recognition.lang = 'ko-KR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = (event) => {
+          let interim = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const t = event.results[i][0].transcript;
+            if (event.results[i].isFinal) finalTranscript += t;
+            else interim += t;
+          }
+          document.getElementById('finalSpan').textContent = finalTranscript;
+          document.getElementById('interimSpan').textContent = interim;
+          document.getElementById('evalBtn').disabled = !finalTranscript.trim();
+        };
+        recognition.onerror = (e) => {
+          if (e.error === 'aborted' || e.error === 'no-speech') return;
+          if (e.error === 'not-allowed') stopRecording();
+        };
+        recognition.onend = arguments.callee;
+        setTimeout(() => { try { recognition.start(); } catch(e) {} }, 200);
       } else {
         const evalBtn = document.getElementById('evalBtn');
         if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
       }
     };
 
-    // 2. recognition 먼저 시작 (getUserMedia보다 앞서 마이크 접근)
     try {
       recognition.start();
-      console.log('[STT] recognition.start() 완료');
-    } catch (e) {
-      console.error('[STT] start 실패:', e);
+    } catch(e) {
+      console.error('STT start 실패:', e);
       return;
     }
 
-    // 3. 파형용 별도 스트림 (recognition과 독립)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      micStream = stream;
-
-      // 파형 시각화
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      audioContext.createMediaStreamSource(stream).connect(analyser);
-      document.getElementById('waveCanvas').style.display = 'block';
-      drawWaveform();
-
-      // MediaRecorder
-      audioChunks = [];
-      mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-        mediaRecorder.stream.getTracks().forEach(t => t.stop());
-      };
-      mediaRecorder.start(1000);
-    } catch (e) {
-      console.warn('[STT] 파형/MediaRecorder 실패 (STT는 계속):', e.message);
-    }
-
-    // 4. UI 업데이트
     isRecording = true;
     remainingSeconds = totalSeconds;
     document.getElementById('recordBtn').classList.add('recording');
@@ -1664,59 +1166,16 @@
     }, 1000);
   }
 
-  function drawWaveform() {
-    const canvas = document.getElementById('waveCanvas');
-    const ctx    = canvas.getContext('2d');
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray    = new Uint8Array(bufferLength);
-
-    function draw() {
-      waveAnimFrame = requestAnimationFrame(draw);
-      analyser.getByteTimeDomainData(dataArray);
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(124,58,237,0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.lineWidth   = 2;
-      ctx.strokeStyle = '#7C3AED';
-      ctx.beginPath();
-
-      const sliceWidth = canvas.width / bufferLength;
-      let x = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        const y = (dataArray[i] / 128.0) * canvas.height / 2;
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        x += sliceWidth;
-      }
-      ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
-    }
-    draw();
-  }
-
   function stopRecording() {
     isRecording = false;
     clearInterval(timerInterval);
-
-    // 파형 중지 및 정리
-    if (waveAnimFrame) { cancelAnimationFrame(waveAnimFrame); waveAnimFrame = null; }
-    const waveCanvas = document.getElementById('waveCanvas');
-    waveCanvas.style.display = 'none';
-    waveCanvas.getContext('2d').clearRect(0, 0, waveCanvas.width, waveCanvas.height);
-    if (audioContext) { audioContext.close(); audioContext = null; analyser = null; }
-
     if (recognition) { try { recognition.stop(); } catch {} }
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-
-    // 300ms 후 강제 반영 (onend보다 늦게 실행되는 경우 대비)
     setTimeout(() => {
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = '';
       const evalBtn = document.getElementById('evalBtn');
       if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
     }, 300);
-
     document.getElementById('recordBtn').classList.remove('recording');
     document.getElementById('recordBtn').innerHTML = '🎤';
     document.getElementById('recordStatus').textContent = finalTranscript.trim()
@@ -1734,51 +1193,29 @@
     document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
   }
 
-  // ─────────────── 스피치 평가 ───────────────
   async function evaluateSpeech() {
     const transcript = finalTranscript.trim();
     if (!transcript) return showError('evalError', '인식된 텍스트가 없습니다. 먼저 녹음해주세요.');
-
     const btn = document.getElementById('evalBtn');
     const loadingEl = document.getElementById('evalLoading');
     const errorEl = document.getElementById('evalError');
-
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> 분석 중...';
     loadingEl.classList.add('show');
     errorEl.classList.remove('show');
-
-    const body = { topic: currentTopic, transcript };
-
-    // 오디오 파일도 함께 전송 (Gemini 음성 분석용, 선택적)
-    if (audioBlob && audioBlob.size < 3 * 1024 * 1024) {
-      try {
-        const b64 = await blobToBase64(audioBlob);
-        body.audioBase64 = b64.split(',')[1];
-        body.audioMimeType = audioBlob.type;
-      } catch {}
-    }
-
     try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+      const res = await fetch('/api/feedback', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ topic: currentTopic, transcript }) });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error);
-
       displayResults(data);
-    } catch (e) {
-      showError('evalError', e.message);
-    } finally {
+    } catch (e) { showError('evalError', e.message); }
+    finally {
       btn.disabled = false;
       btn.innerHTML = '📊 논리 구조 평가';
       loadingEl.classList.remove('show');
     }
   }
 
-  // ─────────────── 결과 표시 ───────────────
   const PREP_GROUP = [
     { key: 'point_intro',      label: 'P. 두괄식 구조', color: '#7C3AED' },
     { key: 'reason',           label: 'R. 근거 제시',   color: '#7C3AED' },
@@ -1796,16 +1233,15 @@
 
   function renderFeedbackItems(listId, group, scores) {
     document.getElementById(listId).innerHTML = group.map(c => {
-      const item     = scores[c.key] || {};
-      const score    = item.score ?? 0;
+      const item = scores[c.key] || {};
+      const score = item.score ?? 0;
       const scoreCls = score >= 8 ? 'high' : score >= 5 ? 'mid' : 'low';
-      return `
-      <div class="prep-item">
+      return `<div class="prep-item">
         <div class="prep-header">
           <span class="prep-label" style="border-color:${c.color}">${c.label}</span>
           <span class="prep-score ${scoreCls}">${score}<span class="prep-denom">/10</span></span>
         </div>
-        ${item.good    ? `<div class="prep-good">✅ ${escHtml(item.good)}</div>`       : ''}
+        ${item.good    ? `<div class="prep-good">✅ ${escHtml(item.good)}</div>` : ''}
         ${item.improve ? `<div class="prep-improve">💡 ${escHtml(item.improve)}</div>` : ''}
       </div>`;
     }).join('');
@@ -1814,82 +1250,35 @@
   function displayResults(result) {
     const section = document.getElementById('resultsSection');
     section.classList.add('show');
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+    section.scrollIntoView({ behavior:'smooth', block:'start' });
     const scores = result.scores || {};
-    const total  = result.total ?? 0;
-
-    // 이중 레이더 차트
+    const total = result.total ?? 0;
     updatePrepChart(PREP_GROUP.map(c => scores[c.key]?.score ?? 0));
-    updateContentChart([...CONTENT_GROUP, ...DELIVERY_GROUP].map(c => scores[c.key]?.score ?? 0));
-
-    // 섹션별 피드백
-    renderFeedbackItems('prepFeedback',    PREP_GROUP,     scores);
-    renderFeedbackItems('contentFeedback', CONTENT_GROUP,  scores);
-    renderFeedbackItems('deliveryFeedback',DELIVERY_GROUP, scores);
-
-    // 종합 점수
+    updateContentChart([...CONTENT_GROUP,...DELIVERY_GROUP].map(c => scores[c.key]?.score ?? 0));
+    renderFeedbackItems('prepFeedback',     PREP_GROUP,     scores);
+    renderFeedbackItems('contentFeedback',  CONTENT_GROUP,  scores);
+    renderFeedbackItems('deliveryFeedback', DELIVERY_GROUP, scores);
     const totalEl = document.getElementById('totalScoreNum');
     totalEl.textContent = total;
-    totalEl.className   = `total-score-num ${total >= 75 ? 'high' : total >= 50 ? 'mid' : 'low'}`;
-
-    // 총평 & 다음 목표
+    totalEl.className = `total-score-num ${total>=75?'high':total>=50?'mid':'low'}`;
     document.getElementById('summaryText').textContent  = result.summary   || '';
     document.getElementById('nextGoalText').textContent = result.next_goal || '';
   }
 
   function makeRadarOptions() {
-    return {
-      responsive: true,
-      scales: {
-        r: {
-          min: 0, max: 10,
-          ticks: { stepSize: 2, font: { size: 9 } },
-          pointLabels: { font: { size: 11, weight: '700' }, color: '#1E293B' }
-        }
-      },
-      plugins: { legend: { display: false } }
-    };
+    return { responsive: true, scales: { r: { min:0, max:10, ticks:{ stepSize:2, font:{size:9} }, pointLabels:{ font:{size:11,weight:'700'}, color:'#1E293B' } } }, plugins:{ legend:{display:false} } };
   }
 
   function updatePrepChart(values) {
     const ctx = document.getElementById('prepChart').getContext('2d');
     if (radarChart1) radarChart1.destroy();
-    radarChart1 = new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels: PREP_GROUP.map(c => c.label),
-        datasets: [{
-          data: values,
-          backgroundColor: 'rgba(124,58,237,0.15)',
-          borderColor: '#7C3AED',
-          borderWidth: 2,
-          pointBackgroundColor: '#7C3AED',
-          pointRadius: 4,
-        }]
-      },
-      options: makeRadarOptions()
-    });
+    radarChart1 = new Chart(ctx, { type:'radar', data:{ labels:PREP_GROUP.map(c=>c.label), datasets:[{ data:values, backgroundColor:'rgba(124,58,237,0.15)', borderColor:'#7C3AED', borderWidth:2, pointBackgroundColor:'#7C3AED', pointRadius:4 }] }, options:makeRadarOptions() });
   }
 
   function updateContentChart(values) {
     const ctx = document.getElementById('contentChart').getContext('2d');
     if (radarChart2) radarChart2.destroy();
-    radarChart2 = new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels: [...CONTENT_GROUP, ...DELIVERY_GROUP].map(c => c.label),
-        datasets: [{
-          data: values,
-          backgroundColor: 'rgba(37,99,235,0.15)',
-          borderColor: '#2563EB',
-          borderWidth: 2,
-          pointBackgroundColor: '#2563EB',
-          pointRadius: 4,
-        }]
-      },
-      options: makeRadarOptions()
-    });
+    radarChart2 = new Chart(ctx, { type:'radar', data:{ labels:[...CONTENT_GROUP,...DELIVERY_GROUP].map(c=>c.label), datasets:[{ data:values, backgroundColor:'rgba(37,99,235,0.15)', borderColor:'#2563EB', borderWidth:2, pointBackgroundColor:'#2563EB', pointRadius:4 }] }, options:makeRadarOptions() });
   }
 
   function resetEval() {
@@ -1897,26 +1286,16 @@
     if (radarChart1) { radarChart1.destroy(); radarChart1 = null; }
     if (radarChart2) { radarChart2.destroy(); radarChart2 = null; }
     clearTranscript();
-    document.getElementById('recordCard').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('recordCard').scrollIntoView({ behavior:'smooth' });
   }
 
-  // ─────────────── 도움말 모달 ───────────────
-  function openHelpModal() {
-    document.getElementById('helpModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeHelpModal() {
-    document.getElementById('helpModal').classList.remove('show');
-    document.body.style.overflow = '';
-  }
-  function handleModalClick(e) {
-    if (e.target === document.getElementById('helpModal')) closeHelpModal();
-  }
+  function openHelpModal() { document.getElementById('helpModal').classList.add('show'); document.body.style.overflow = 'hidden'; }
+  function closeHelpModal() { document.getElementById('helpModal').classList.remove('show'); document.body.style.overflow = ''; }
+  function handleModalClick(e) { if (e.target === document.getElementById('helpModal')) closeHelpModal(); }
 
-  // ─────────────── 유틸 ───────────────
   function showError(id, msg) {
     const el = document.getElementById(id);
-    const isRateLimit = (msg || '').includes('혼잡');
+    const isRateLimit = (msg||'').includes('혼잡');
     el.textContent = (isRateLimit ? '⚠️ ' : '❌ ') + msg;
     el.classList.remove('warn');
     if (isRateLimit) el.classList.add('warn');
@@ -1924,20 +1303,7 @@
   }
 
   function escHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 </script>
 </body>
