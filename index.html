@@ -1518,61 +1518,13 @@
 
   // ─────────────── Web Speech API ───────────────
   function setupSpeechRecognition() {
+    // 브라우저 지원 여부 체크만 수행 (recognition 객체 생성은 startRecording에서)
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      document.getElementById('recordStatus').textContent = '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.';
-      return;
+      document.getElementById('recordBtn').disabled = true;
+      document.getElementById('recordStatus').textContent =
+        '⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.';
     }
-    recognition = new SR();
-    recognition.lang = 'ko-KR';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onresult = (event) => {
-      let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const t = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += t;
-        } else {
-          interim += t;
-        }
-      }
-      // 반드시 DOM 즉시 반영
-      document.getElementById('finalSpan').textContent = finalTranscript;
-      document.getElementById('interimSpan').textContent = interim;
-      document.getElementById('evalBtn').disabled = !finalTranscript.trim();
-    };
-
-    recognition.onerror = (e) => {
-      console.error('STT 오류:', e.error);
-      const statusEl = document.getElementById('recordStatus');
-      if (e.error === 'not-allowed') {
-        statusEl.textContent = '⚠️ 마이크 권한이 차단되어 있습니다. 주소창 자물쇠 아이콘에서 마이크를 허용해주세요.';
-        isRecording = false;
-        document.getElementById('recordBtn').classList.remove('recording');
-        document.getElementById('recordBtn').innerHTML = '🎤';
-      } else if (e.error === 'no-speech') {
-        statusEl.textContent = '음성이 감지되지 않았습니다. 말씀해주세요.';
-      } else {
-        statusEl.textContent = '⚠️ 음성인식 오류가 발생했습니다. 다시 시도해주세요.';
-      }
-    };
-
-    recognition.onend = () => {
-      // 종료 시점에 finalTranscript DOM 강제 반영
-      document.getElementById('finalSpan').textContent = finalTranscript;
-      document.getElementById('interimSpan').textContent = '';
-
-      if (isRecording) {
-        // 아직 녹음 중이면 재시작 (끊김 방지)
-        try { recognition.start(); } catch (e) { stopRecording(); }
-      } else {
-        // 정상 종료 시 evalBtn 활성화
-        const evalBtn = document.getElementById('evalBtn');
-        if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
-      }
-    };
   }
 
   // ─────────────── 시간 선택 ───────────────
@@ -1597,13 +1549,8 @@
   async function startRecording() {
     console.log('[STT] startRecording 시작');
 
-    // 이전 recognition 완전 종료 대기
-    if (recognition) {
-      console.log('[STT] 이전 recognition 종료 중...');
-      try { recognition.stop(); } catch (e) { console.log('[STT] stop 오류:', e); }
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log('[STT] 500ms 대기 완료');
-    }
+    // 이전 참조만 끊기 (stop() 호출 금지 — onend 발동으로 인한 충돌 방지)
+    recognition = null;
 
     finalTranscript = '';
     document.getElementById('finalSpan').textContent = '';
@@ -1661,7 +1608,10 @@
       document.getElementById('finalSpan').textContent = finalTranscript;
       document.getElementById('interimSpan').textContent = '';
       if (isRecording) {
-        try { recognition.start(); } catch (e) {}
+        // 끊김 방지 재시작 (100ms 후 — onend 완료 후 재시작)
+        setTimeout(() => {
+          try { recognition.start(); } catch (e) { console.log('[STT] 재시작 실패:', e); }
+        }, 100);
       } else {
         const evalBtn = document.getElementById('evalBtn');
         if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
