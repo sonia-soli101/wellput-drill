@@ -2,7 +2,7 @@ name: 뉴스 자동 수집
 
 on:
   schedule:
-    - cron: '0 0,6,12,18 * * *'   # 매일 0시 / 6시 / 12시 / 18시 (UTC)
+    - cron: '0 0,12 * * *'         # 매일 UTC 00:00 (KST 09:00) / UTC 12:00 (KST 21:00)
   workflow_dispatch:                 # 수동 실행 허용
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
       - name: Node.js 설정
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: 패키지 설치
         run: npm install

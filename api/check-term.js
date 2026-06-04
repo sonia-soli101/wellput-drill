@@ -1,5 +1,16 @@
+const { Redis } = require('@upstash/redis');
+
 function cleanJSON(text) {
   return text.replace(/```json/g, '').replace(/```/g, '').trim();
+}
+
+let _redis;
+function getRedis() {
+  if (!_redis) _redis = new Redis({
+    url:   process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  return _redis;
 }
 
 module.exports = async function handler(req, res) {
@@ -65,6 +76,16 @@ module.exports = async function handler(req, res) {
       parsed = JSON.parse(cleanJSON(raw));
     } catch {
       return res.status(500).json({ error: '일시적인 오류가 발생했습니다. 다시 시도해주세요.' });
+    }
+
+    // AI/Tech 용어이면 Redis에 저장
+    if (parsed.isAiTerm) {
+      try {
+        const termData = { term, desc: parsed.desc || term, addedAt: new Date().toISOString() };
+        await getRedis().hset('custom_terms', { [term]: JSON.stringify(termData) });
+      } catch (redisErr) {
+        console.error('[Redis 저장 오류]', redisErr.message);
+      }
     }
 
     return res.status(200).json(parsed);

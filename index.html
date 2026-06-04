@@ -509,6 +509,33 @@
     }
     .time-btn.active { background: var(--purple); color: white; border-color: var(--purple); }
 
+    /* ── 저장된 커스텀 용어 칩 ── */
+    .saved-term-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px 5px 14px;
+      border: 1.5px solid var(--purple);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      background: white;
+      color: var(--purple);
+      cursor: default;
+      transition: all .2s;
+    }
+    .saved-term-chip:hover { background: #F5F3FF; }
+    .saved-term-chip span:first-child { cursor: pointer; }
+    .saved-term-chip .delete-btn {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 2px;
+      line-height: 1;
+      cursor: pointer;
+      transition: color .2s;
+    }
+    .saved-term-chip .delete-btn:hover { color: var(--red); }
+
     /* ── 로딩 ── */
     .spinner {
       display: inline-block;
@@ -799,6 +826,10 @@
       </div>
       <p class="loading-text" id="termCheckLoading">AI 용어 여부 확인 중...</p>
       <div class="error-box" id="termCheckError"></div>
+      <div id="savedTermsArea" style="margin-top:12px;display:none">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">📦 저장된 용어</div>
+        <div id="savedTermsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
     </div>
 
     <div class="topic-gen-wrap" id="termTopicBtnWrap" style="display:none">
@@ -1010,6 +1041,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     renderTermGrid();
     setupSpeechRecognition();
+    loadCustomTerms();
   });
 
   // ─────────────── 모드 전환 ───────────────
@@ -1246,6 +1278,18 @@
       addCustomTermChip(term, data.desc || term);
       input.value = '';
       errorEl.classList.remove('show');
+
+      // savedTermsList에도 칩 추가 (중복 방지)
+      const area = document.getElementById('savedTermsArea');
+      const list = document.getElementById('savedTermsList');
+      if (!list.querySelector(`[data-saved-term=${JSON.stringify(term)}]`)) {
+        area.style.display = 'block';
+        const savedChip = document.createElement('div');
+        savedChip.className = 'saved-term-chip';
+        savedChip.dataset.savedTerm = term;
+        savedChip.innerHTML = `<span onclick="selectTermByName(${JSON.stringify(term)})">${escHtml(term)}</span><span class="delete-btn" onclick="deleteCustomTerm(${JSON.stringify(term)}, this)" title="삭제">✕</span>`;
+        list.appendChild(savedChip);
+      }
     } catch (e) {
       errorEl.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
       errorEl.classList.add('show');
@@ -1269,6 +1313,60 @@
     document.getElementById('termGrid').appendChild(chip);
     selectTerm(term, chip);
     chip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ─────────────── 저장된 커스텀 용어 ───────────────
+  function selectTermByName(term) {
+    const chip = document.querySelector(`.term-chip[data-term="${CSS.escape(term)}"]`);
+    selectTerm(term, chip || null);
+  }
+
+  async function loadCustomTerms() {
+    try {
+      const res  = await fetch('/api/custom-terms');
+      const data = await res.json();
+      if (!data.terms || data.terms.length === 0) return;
+
+      const area = document.getElementById('savedTermsArea');
+      const list = document.getElementById('savedTermsList');
+      list.innerHTML = '';
+      area.style.display = 'block';
+
+      data.terms.forEach(({ term, desc }) => {
+        addCustomTermChip(term, desc || term);
+        const chip = document.createElement('div');
+        chip.className = 'saved-term-chip';
+        chip.dataset.savedTerm = term;
+        chip.innerHTML = `<span onclick="selectTermByName(${JSON.stringify(term)})">${escHtml(term)}</span><span class="delete-btn" onclick="deleteCustomTerm(${JSON.stringify(term)}, this)" title="삭제">✕</span>`;
+        list.appendChild(chip);
+      });
+    } catch (e) {
+      console.error('저장된 용어 불러오기 실패:', e);
+    }
+  }
+
+  async function deleteCustomTerm(term, btnEl) {
+    if (!confirm(`"${term}" 용어를 삭제할까요?`)) return;
+    try {
+      const res = await fetch('/api/custom-terms', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ term })
+      });
+      if (!res.ok) throw new Error();
+
+      btnEl.closest('.saved-term-chip').remove();
+      const gridChip = document.querySelector(`.term-chip[data-term="${CSS.escape(term)}"]`);
+      if (gridChip) gridChip.remove();
+      const list = document.getElementById('savedTermsList');
+      if (list.children.length === 0) document.getElementById('savedTermsArea').style.display = 'none';
+      if (selectedTerm === term) {
+        selectedTerm = null;
+        document.getElementById('termTopicBtnWrap').style.display = 'none';
+      }
+    } catch (e) {
+      alert('삭제 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   }
 
   async function generateTermTopic() {
@@ -1444,9 +1542,11 @@
     };
 
     recognition.onend = () => {
-      if (isRecording) {
-        try { recognition.start(); } catch (err) { console.warn('recognition.start 실패:', err.message); }
-      }
+      // 최종 transcript를 DOM에 반영 (마지막 결과 유실 방지)
+      document.getElementById('finalSpan').textContent = finalTranscript;
+      document.getElementById('interimSpan').textContent = '';
+      if (!isRecording) return;  // 정상 종료면 재시작 안 함
+      try { recognition.start(); } catch (err) { stopRecording(); }
     };
   }
 
@@ -1510,7 +1610,16 @@
   }
 
   function stopRecording() {
-    if (recognition) { try { recognition.stop(); } catch {} }
+    if (recognition) {
+      try { recognition.stop(); } catch {}
+      // onresult 마지막 결과 처리 대기 후 DOM 반영
+      setTimeout(() => {
+        document.getElementById('finalSpan').textContent = finalTranscript;
+        document.getElementById('interimSpan').textContent = '';
+        const evalBtn = document.getElementById('evalBtn');
+        if (evalBtn) evalBtn.disabled = !finalTranscript.trim();
+      }, 300);
+    }
     if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
     clearInterval(timerInterval);
 
